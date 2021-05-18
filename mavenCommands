@@ -1,0 +1,82 @@
+.\test-sd-tp1.bat -image sd2021-tp1-55797-55797 -test 2a -sleep 2 -log ALL
+
+.\test-sd-tp2.bat -image sd2021-tp1-55797-55797 -test 106a -sleep 2 -log ALL
+
+mvn clean compile assembly:single docker:build
+
+--create the docker network sdnet
+docker network create -d bridge sdnet
+
+--Run the server in a named container (with port
+forwarding)
+
+docker run -h ServerHost --name DANIELServer --network sdnet -p 8080:8080 sd2021-aula2-55797-55797
+
+-- Run another container in interactive mode (to execute clients) in a second terminal window
+	docker run -it --network sdnet sd2021-tp1-55797-55797 /bin/bash
+	
+-- run the servers
+	java -cp /home/sd/sd2021.jar tp1.api.server.rest.UsersServer FCT <followed by the adequate arguments>
+	
+	
+	USER:
+	docker network create -d bridge sdnet
+	docker run -it --network sdnet sd2021-tp1-55797-55797 /bin/bash
+	java -cp /home/sd/sd2021.jar tp1.api.server.rest.UsersServer FCT
+	
+	docker run -it --network sdnet sd2021-tp1-55797-55797 /bin/bash
+	java -cp /home/sd/sd2021.jar tp1.api.server.rest.UsersServer FCT9090
+
+	docker network create -d bridge sdnet
+	
+	docker run -it --network sdnet sd2021-tp1-55797-55797 /bin/bash
+	java -cp /home/sd/sd2021.jar tp1.api.server.rest.SpreadSheetsServer FCT
+
+	java -cp /home/sd/sd2021.jar tp1.api.server.rest.SpreadSheetsServer FCT2
+	
+	
+	<followed by the adequate arguments>
+
+	
+	
+	
+-- create user
+	java -cp /home/sd/sd2021.jar tp1.api.clients.CreateUserClient http://172.18.0.2:8080/rest dan.jm "daniel joao" dj@gmail.com ok.ok
+	
+	docker run -it --network sdnet sd2021-tp1-55797-55797 /bin/bash
+	java -cp /home/sd/sd2021.jar tp1.api.clients.CreateUserClient FCT dan.jm "daniel joao" dj@gmail.com ok.ok
+	
+	java -cp /home/sd/sd2021.jar tp1.api.clients.CreateUserClient FCT dan.jm2 "daniel joao" dj@gmail.com ok.ok
+	
+	
+	
+	java -cp /home/sd/sd2021.jar tp1.api.clients.SearchUserClient http://172.20.0.2:8080/rest dan.jm "daniel joao" dj@gmail.com ok.ok
+	
+	
+--spreadsheets clients
+	docker run -it --network sdnet sd2021-tp1-55797-55797 /bin/bash
+
+----create
+
+	java -cp /home/sd/sd2021.jar tp1.api.spreadsheet.clients.CreateSpreadSheetClient FCT 432 dan.dsajm ok.ok 4 4
+	
+	java -cp /home/sd/sd2021.jar tp1.api.spreadsheet.clients.CreateSpreadSheetClient FCT null dan.jm ok.ok 4 4
+	
+----delete
+	
+	java -cp /home/sd/sd2021.jar tp1.api.spreadsheet.clients.DeleteSpreadSheetClient FCT 432 ok.ok3
+	
+----getSpread
+	java -cp /home/sd/sd2021.jar tp1.api.spreadsheet.clients.GetSpreadSheetClient FCT 432 dan.jm2 ok.ok
+	
+	java -cp /home/sd/sd2021.jar tp1.api.spreadsheet.clients.GetSpreadSheetClient FCT 434 dan.jm2 ok.ok
+	
+	ERROS NO TESTER:
+	3a: Ultimo teste -> getting invalid users 
+	
+	3c: -> FAILED: UpdateCell; id = 3 ; cell = D2 ; rawValue = 2 ; userId = blake.gottlieb ; pwd = w6eoe4afjfbwrow
+Expected : 204; received : 403
+	
+	password do dono : xzuuby5zxz0ikg
+	password do user a fazer update : w6eoe4afjfbwrow
+	
