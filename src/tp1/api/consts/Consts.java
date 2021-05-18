@@ -10,6 +10,6 @@ public interface Consts {
 	public final static long RETRY_PERIOD = 1000;
 	public final static int CONNECTION_TIMEOUT = 10000;
 	public final static int REPLY_TIMEOUT = 600;
-	public final static Client client = GetUserClient.getClient();
+	public final static Client client = GetUserClient.getClient(); //HELLO
 
 }
