@@ -65,6 +65,8 @@ public class DropboxResource  implements RestSpreadsheets{
 		accessToken = new OAuth2AccessToken(accessTokenStr);
 		
 		json = new Gson();
+		
+		//Directory name deveria ser o domainName ???
 		this.directoryName = directoryName;
 		createFolder(directoryName);
 	}

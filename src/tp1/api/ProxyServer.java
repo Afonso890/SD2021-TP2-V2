@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 
 import tp1.api.discovery.Discovery;
 import tp1.api.server.rest.SpreadSheetsServer;
+import tp1.api.servers.resources.DropboxResource;
 import tp1.api.servers.resources.SpreadSheetResource;
 import tp1.util.InsecureHostnameVerifier;
 
@@ -43,25 +44,15 @@ public class ProxyServer {
 		String domainName = args[0];
 		//This allows client code executed by this server to ignore hostname verification
 		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
-		/*
-		 * Multiple resources (i.e., services) can be
-			registered. They should have different
-			(top level) @Path annotations.
-		 */
+
 		ResourceConfig config = new ResourceConfig();
-		//SpreadSheetResource.class
-		/*
-		 * This defines the server URL. If the
-			machine IP address is 192.168.1.103 the
-			URL will become:
-			http://192.168.1.103:8080/rest
-		 */
+
 		String serverURI = String.format("https://%s:%s/rest", ip, PORT);
 		
 		
 		martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 		martian.start();
-		config.register(new SpreadSheetResource(domainName,martian,serverURI));		
+		config.register(new DropboxResource(domainName,martian,serverURI,domainName));		
 		/*
 		 * This effectively starts the server (with
 			their own threads to handle client
