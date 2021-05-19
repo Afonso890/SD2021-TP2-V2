@@ -80,14 +80,11 @@
 			<artifactId>scribejava-apis</artifactId>
 		</dependency>
 		<dependency>
-<<<<<<< HEAD
     		<groupId>org.apache.commons</groupId>
    		    <artifactId>commons-lang3</artifactId>
     		<version>3.12.0</version>
 		</dependency>
 		<dependency>
-=======
->>>>>>> b3e44e73bd548fb624ab7836df66eac7da6f8d66
 			<groupId>org.pac4j</groupId>
 			<artifactId>pac4j-oauth</artifactId>
 		</dependency>
@@ -155,14 +152,11 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-<<<<<<< HEAD
-=======
 			    <groupId>org.apache.commons</groupId>
 			    <artifactId>commons-lang3</artifactId>
 			    <version>3.12.0</version>
 			</dependency>
 			<dependency>
->>>>>>> b3e44e73bd548fb624ab7836df66eac7da6f8d66
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
 				<version>2.12.3</version>

@@ -39,8 +39,6 @@ public class DownloadFile {
 		
 		downloadFile.addHeader("Dropbox-API-Arg",json.toJson(new DownloadFileArgs(filePath)));
 
-		//createFolder.setPayload(json.toJson(new CreateFolderV2Args(directoryName, false)));
-
 		service.signRequest(accessToken, downloadFile);
 		
 		Response r = null;

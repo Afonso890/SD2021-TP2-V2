@@ -21,19 +21,6 @@ import tp1.util.InsecureHostnameVerifier;
 
 public class ProxyServer {
 	
-	private static final String apiKey = "t5nzwsbik89p5s0";
-	private static final String apiSecret = "31kkgco1l2vfzdp";
-	private static final String accessTokenStr = "dRhKRkkXUXQAAAAAAAAAASVCYAvD2RIUKPod26ZwW6QYGmK8n4pRhB4GxQiBf5SG";
-
-	protected static final String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
-	
-	private static final String CREATE_FOLDER_V2_URL = "https://api.dropboxapi.com/2/files/create_folder_v2";
-	
-	private OAuth20Service service;
-	private OAuth2AccessToken accessToken;
-	
-	private Gson json;
-	
 	private static Logger Log = Logger.getLogger(SpreadSheetsServer.class.getName());
 
 	static {
