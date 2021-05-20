@@ -4,14 +4,15 @@ import jakarta.jws.WebService;
 import tp1.api.Spreadsheet;
 import tp1.api.discovery.Discovery;
 import tp1.api.servers.resources.SpreadSheetsSharedMethods;
+import tp1.api.storage.StorageInterface;
 
 @WebService(serviceName=SoapSpreadsheets.NAME, targetNamespace=SoapSpreadsheets.NAMESPACE, endpointInterface=SoapSpreadsheets.INTERFACE)
 public class SpreadSheetsWS implements SoapSpreadsheets{
 	
 	private final SpreadSheetsSharedMethods resource;
 
-	public SpreadSheetsWS(String domainName, Discovery martian, String uri) {
-		resource = new SpreadSheetsSharedMethods(domainName, martian, uri);
+	public SpreadSheetsWS(String domainName, Discovery martian, String uri, StorageInterface spreadSheets) {
+		resource = new SpreadSheetsSharedMethods(domainName, martian, uri,spreadSheets);
 	}
 	@Override
 	public String createSpreadsheet(Spreadsheet sheet, String password) throws SheetsException {

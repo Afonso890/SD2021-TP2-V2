@@ -1,10 +1,7 @@
 package tp1.api.servers.resources;
 
-import java.util.HashMap;
-
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -16,6 +13,7 @@ import tp1.api.clients.GetUserClient;
 import tp1.api.consts.Consts;
 import tp1.api.discovery.Discovery;
 import tp1.api.server.rest.UsersServer;
+import tp1.api.storage.StorageInterface;
 import tp1.impl.engine.SpreadsheetEngineImpl;
 import tp1.util.CellRange;
 import tp1.util.GetAbstractSpreadSheet;
@@ -24,14 +22,15 @@ public class SpreadSheetsSharedMethods {
 	//private static Logger Log = Logger.getLogger(SpreadSheetResource.class.getName());
 	public static Discovery martian;
 	private String domainName;
-	private Map<String,Spreadsheet> spreadSheets = new HashMap<String, Spreadsheet>();
+	private StorageInterface spreadSheets;
 	private Client client;
 	private int ids;
 	private String uri;
 
-	public SpreadSheetsSharedMethods(String domainName, Discovery martian, String uri) {
+	public SpreadSheetsSharedMethods(String domainName, Discovery martian, String uri, StorageInterface spreadSheets) {
 		this.domainName=domainName;
 		this.client = Consts.client;
+		this.spreadSheets=spreadSheets;
 		SpreadSheetsSharedMethods.martian=martian;
 		this.uri=uri;
 		ids=0;
@@ -223,7 +222,7 @@ public class SpreadSheetsSharedMethods {
 	 */
 	public void deleteSpreadsheet(String userId) {
 		synchronized (spreadSheets) {
-			Iterator<Entry<String,Spreadsheet>> it = spreadSheets.entrySet().iterator();
+			Iterator<Entry<String,Spreadsheet>> it = spreadSheets.entries();
 			Entry<String,Spreadsheet> sp;
 			while(it.hasNext()) {
 				sp=it.next();

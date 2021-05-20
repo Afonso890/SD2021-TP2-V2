@@ -1,4 +1,4 @@
-package tp1.api.servers.resources;
+package tp1.api.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +27,7 @@ import tp1.api.dropbox.args.CreateFileArgs;
 import tp1.api.dropbox.args.CreateFolderV2Args;
 import tp1.api.dropbox.args.DownloadFileArgs;
 import tp1.api.server.rest.UsersServer;
+import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 import tp1.api.service.rest.RestSpreadsheets;
 
 public class DropboxResource  implements RestSpreadsheets{

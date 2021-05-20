@@ -4,6 +4,7 @@ import jakarta.inject.Singleton;
 import tp1.api.Spreadsheet;
 import tp1.api.discovery.Discovery;
 import tp1.api.service.rest.RestSpreadsheets;
+import tp1.api.storage.StorageInterface;
 
 @Singleton
 public class SpreadSheetResource implements RestSpreadsheets{
@@ -11,8 +12,8 @@ public class SpreadSheetResource implements RestSpreadsheets{
 
 	private final SpreadSheetsSharedMethods resource;
 
-	public SpreadSheetResource(String domainName, Discovery martian,String uri) {
-		resource = new SpreadSheetsSharedMethods(domainName, martian, uri);
+	public SpreadSheetResource(String domainName, Discovery martian,String uri, StorageInterface spreadSheets) {
+		resource = new SpreadSheetsSharedMethods(domainName, martian, uri,spreadSheets);
 	}
 	
 	@Override

@@ -15,6 +15,7 @@ import com.sun.net.httpserver.HttpsServer;
 
 import jakarta.xml.ws.Endpoint;
 import tp1.api.discovery.Discovery;
+import tp1.api.storage.MemoryStorage;
 import tp1.util.InsecureHostnameVerifier;
 
 public class SpreadSheetsServerSoap {
@@ -49,7 +50,7 @@ public class SpreadSheetsServerSoap {
 			String domainName=args[0];
 			Discovery martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 			martian.start();
-			Endpoint soapUsersEndpoint = Endpoint.create(new SpreadSheetsWS(domainName,martian,serverURI));
+			Endpoint soapUsersEndpoint = Endpoint.create(new SpreadSheetsWS(domainName,martian,serverURI,new MemoryStorage()));
 			
 			soapUsersEndpoint.publish(server.createContext(SOAP_SHEETS_PATH));
 			

@@ -13,6 +13,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.api.discovery.Discovery;
 import tp1.api.servers.resources.SpreadSheetResource;
+import tp1.api.storage.MemoryStorage;
+import tp1.api.storage.StorageInterface;
 import tp1.util.InsecureHostnameVerifier;
 
 public class SpreadSheetsServer {
@@ -30,11 +32,15 @@ public class SpreadSheetsServer {
 	public static Discovery martian=null;
 	
 	public static void main(String[] args) {
+		if(args.length!=1) {
+			System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.SpreadSheetsServer serverName");
+			return;
+		}
+		startServer(args,new MemoryStorage());
+	}
+	public static void startServer(String[] args, StorageInterface storage) {
 		try {
-			if(args.length!=1) {
-				System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.SpreadSheetsServer serverName");
-				return;
-			}
+			
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		String domainName = args[0];
 		//This allows client code executed by this server to ignore hostname verification
@@ -57,7 +63,7 @@ public class SpreadSheetsServer {
 		
 		martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 		martian.start();
-		config.register(new SpreadSheetResource(domainName,martian,serverURI));		
+		config.register(new SpreadSheetResource(domainName,martian,serverURI, storage));		
 		/*
 		 * This effectively starts the server (with
 			their own threads to handle client
