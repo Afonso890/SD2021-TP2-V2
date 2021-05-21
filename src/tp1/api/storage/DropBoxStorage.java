@@ -4,18 +4,17 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import tp1.api.Spreadsheet;
+import tp1.api.dropbox.DropboxOperations;
 
 public class DropBoxStorage implements StorageInterface{
-
-	private String domainName;
+	DropboxOperations dp;
 	public DropBoxStorage(String domainName) {
-		this.domainName=domainName;
+		dp=new DropboxOperations("/"+domainName);
 	}
 
 	@Override
 	public Spreadsheet get(String sheetid) {
-		// TODO Auto-generated method stub
-		return null;
+		return dp.downloadFile(sheetid);
 	}
 
 	@Override

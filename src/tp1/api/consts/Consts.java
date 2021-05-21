@@ -1,5 +1,11 @@
 package tp1.api.consts;
 
+import org.pac4j.scribe.builder.api.DropboxApi20;
+
+
+import com.github.scribejava.core.builder.ServiceBuilder;
+import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.Gson;
 
 import jakarta.ws.rs.client.Client;
@@ -27,5 +33,7 @@ public interface Consts {
 	public static final String OCTET_STREAM = "application/octet-stream";
 	
 	public static Gson json=new Gson();
-
+	public static OAuth20Service service = new ServiceBuilder(Consts.apiKey).apiSecret(Consts.apiSecret).build(DropboxApi20.INSTANCE);
+	public static OAuth2AccessToken accessToken =  new OAuth2AccessToken(Consts.accessTokenStr);
+	
 }

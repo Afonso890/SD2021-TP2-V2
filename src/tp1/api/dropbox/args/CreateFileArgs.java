@@ -10,9 +10,9 @@ public class CreateFileArgs {
     "strict_conflict": false
 }
  */
-	private static String MODE1="add"; 
+	//private static String MODE1="add"; 
 	private static String MODE2="overwrite";
-	private static String MODE3="update";
+	//private static String MODE3="update";
 	String path, mode;
 	boolean mute, strict_conflict,autorename;
 	public CreateFileArgs(String path) {
