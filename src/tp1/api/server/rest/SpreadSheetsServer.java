@@ -40,7 +40,6 @@ public class SpreadSheetsServer {
 	}
 	public static void startServer(String[] args, StorageInterface storage) {
 		try {
-			
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		String domainName = args[0];
 		//This allows client code executed by this server to ignore hostname verification
@@ -63,6 +62,7 @@ public class SpreadSheetsServer {
 		
 		martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 		martian.start();
+		
 		config.register(new SpreadSheetResource(domainName,martian,serverURI, storage));		
 		/*
 		 * This effectively starts the server (with

@@ -45,8 +45,7 @@ public class DropboxOperations {
 		service = new ServiceBuilder(Consts.apiKey).apiSecret(Consts.apiSecret).build(DropboxApi20.INSTANCE);
 		accessToken = new OAuth2AccessToken(Consts.accessTokenStr);	
 		json=new Gson();
-		this.directoryName=directoryName;
-	}
+		this.directoryName=directoryName;	}
 	
 	
 	

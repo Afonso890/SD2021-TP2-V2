@@ -20,9 +20,9 @@ public interface Consts {
 	public final static int REPLY_TIMEOUT = 600;
 	public final static Client client = GetUserClient.getClient(); //HELLO
 	
-	public static final String apiKey = "9chdle2yya045j0";
-	public static final String apiSecret = "xybv9724j3tgl6v";
-	public static final String accessTokenStr = "-0qR1RteBDkAAAAAAAAAAQI7pokaWYO3Kubs97VGt7zHdbv4ST6kSbzSKL3ohQRK";
+	public static final String apiKey = "t5nzwsbik89p5s0";
+	public static final String apiSecret = "31kkgco1l2vfzdp";
+	public static final String accessTokenStr = "SsfyAnfENp4AAAAAAAAAAYEO8s8x8x4TM2QbVzeHAtJvxS4_1GzNcd8Y3En7Qr32";
 	
 	public static final String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 	

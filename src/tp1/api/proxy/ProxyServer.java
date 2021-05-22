@@ -18,7 +18,7 @@ public class ProxyServer {
 	public static Discovery martian=null;
 	
 	public static void main(String[] args) {
-		if(args.length!=1) {
+	/*	if(args.length!=1) {
 			System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.SpreadSheetsServer serverName");
 			return;
 		}
@@ -52,6 +52,7 @@ public class ProxyServer {
 		} catch( Exception e) {
 			Log.severe(e.getMessage());
 		}*/
+
 		SpreadSheetsServer.startServer(args,new DropBoxStorage(args[0]));
 	}
 
