@@ -2,7 +2,6 @@ package tp1.api.dropbox;
 
 import java.io.IOException;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -129,8 +128,8 @@ public class DropboxOperations {
 		Spreadsheet sp=null;
 		if(r.getCode() == 200) {
 			try {
-				InputStream in = r.getStream();
-				String g = new String(in.readAllBytes());
+				//InputStream in = r.getStream();
+				String g = r.getBody(); //new String(in.readAllBytes());
 				sp=json.fromJson(g,Spreadsheet.class);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -162,8 +161,7 @@ public class DropboxOperations {
 			r = service.execute(deleteFile);
 			
 			if (r.getCode() == 200) {
-				InputStream in = r.getStream();
-				String g = new String(in.readAllBytes());
+				String g = new String(r.getBody());
 				sp=json.fromJson(g,Spreadsheet.class);
 				System.err.println("Dropbox file was deleted with success");
 				return sp;
@@ -225,8 +223,8 @@ public class DropboxOperations {
 				}
 			}			
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			//e.printStackTrace();
+			System.out.println("LIST DIRECTORY ERRRO ---------------------: "+e.getLocalizedMessage());
 		}
 			
 		return spreadSheets;
