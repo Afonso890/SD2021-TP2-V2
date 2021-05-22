@@ -1,9 +1,12 @@
 package tp1.api.dropbox;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.pac4j.scribe.builder.api.DropboxApi20;
 
@@ -14,7 +17,6 @@ import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.Gson;
-import com.sun.net.httpserver.Authenticator.Result;
 
 import sd2021.aula9.dropbox.replies.ListFolderReturn;
 import sd2021.aula9.dropbox.replies.ListFolderReturn.FolderEntry;
@@ -26,6 +28,7 @@ import tp1.api.dropbox.args.CreateFolderV2Args;
 import tp1.api.dropbox.args.DownloadFileArgs;
 import tp1.api.dropbox.args.ListFolderArgs;
 import tp1.api.dropbox.args.ListFolderContinueArgs;
+import tp1.util.EntryClass;
 
 
 public class DropboxOperations {
@@ -179,8 +182,9 @@ public class DropboxOperations {
 		return sp;
 	}
 	
-	public List<String> listDirectory() {
-		List<String> directoryContents = new ArrayList<String>();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List<Entry<String,Spreadsheet>> listDirectory() {
+		List<Entry<String,Spreadsheet>> spreadSheets = new ArrayList<Map.Entry<String,Spreadsheet>>();
 		
 		OAuthRequest listDirectory = new OAuthRequest(Verb.POST, LIST_FOLDER_URL);
 		listDirectory.addHeader("Content-Type", JSON_CONTENT_TYPE);
@@ -189,7 +193,8 @@ public class DropboxOperations {
 		service.signRequest(accessToken, listDirectory);
 		
 		Response r = null;
-		
+		Spreadsheet sp;
+		Entry<String,Spreadsheet> en;
 		try {
 			while(true) {
 				r = service.execute(listDirectory);
@@ -203,7 +208,9 @@ public class DropboxOperations {
 				ListFolderReturn reply = json.fromJson(r.getBody(), ListFolderReturn.class);
 				
 				for(FolderEntry e: reply.getEntries()) {
-					directoryContents.add(e.toString());
+					sp=Consts.json.fromJson(e.toString(),Spreadsheet.class);
+					en=new EntryClass(sp.getSheetId(),sp);
+					spreadSheets.add(en);
 				}
 				
 				if(reply.has_more()) {
@@ -222,7 +229,7 @@ public class DropboxOperations {
 			return null;
 		}
 			
-		return directoryContents;
+		return spreadSheets;
 	}
 	
 }

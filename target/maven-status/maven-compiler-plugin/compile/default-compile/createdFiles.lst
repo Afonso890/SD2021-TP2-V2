@@ -32,6 +32,7 @@ tp1\api\engine\AbstractSpreadsheet.class
 tp1\api\consts\Consts.class
 tp1\api\dropbox\replies\ListFolderReturn.class
 tp1\api\Spreadsheet.class
+tp1\util\EntryClass.class
 tp1\api\dropbox\args\ListFolderArgs.class
 tp1\api\dropbox\args\CreateFileArgs.class
 tp1\impl\engine\SpreadsheetEngineImpl.class
