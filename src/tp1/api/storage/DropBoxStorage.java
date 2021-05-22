@@ -40,4 +40,40 @@ public class DropBoxStorage implements StorageInterface{
 		return null;
 	}
 
+	@Override
+	public void updateCell(Spreadsheet sp, String cell, String rawValue) {
+		sp.setCellRawValue(cell, rawValue);
+		put(sp.getSheetId(),sp);
+	}
+
+	@Override
+	public boolean share(Spreadsheet sp, String userid) {
+		boolean added=sp.getSharedWith().add(userid);
+		if(added) {
+			put(sp.getSheetId(),sp);
+		}
+		return added;
+	}
+
+	@Override
+	public boolean unShare(Spreadsheet sp, String userid) {
+		boolean removed = sp.getSharedWith().remove(userid);
+		if(removed) {
+			put(sp.getSheetId(),sp);
+		}
+		return removed;
+	}
+
+	@Override
+	public void deleteSheetsOfThisUser(String userid) {
+		Iterator<Entry<String,Spreadsheet>> it = entries();
+		Entry<String,Spreadsheet> sp;
+		while(it.hasNext()) {
+			sp=it.next();
+			if(sp.getValue().getOwner().equals(userid)) {
+				remove(sp.getKey());
+			}
+		}
+	}
+
 }

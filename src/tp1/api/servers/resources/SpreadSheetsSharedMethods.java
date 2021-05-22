@@ -185,8 +185,9 @@ public class SpreadSheetsSharedMethods {
 				throw new WebApplicationException(Status.FORBIDDEN);
 			}
 			passwordIsCorrect(userId,password,Status.FORBIDDEN);
-			sp.setCellRawValue(cell, rawValue);
+			//sp.setCellRawValue(cell, rawValue);
 			//cachedValues.remove(sheetId);
+			spreadSheets.updateCell(sp,cell,rawValue);
 		}
 		
 	}
@@ -200,7 +201,7 @@ public class SpreadSheetsSharedMethods {
 			if(sp.getSharedWith()==null) {
 				sp.setSharedWith(new HashSet<String>());
 			}
-			if(!sp.getSharedWith().add(userId)) {
+			if(!spreadSheets.share(sp, userId)) {
 				throw new WebApplicationException( Status.CONFLICT );
 			}
 		}
@@ -211,7 +212,7 @@ public class SpreadSheetsSharedMethods {
 			userId = userExists(userId);
 			Spreadsheet sp =hasSpreadSheet(sheetId);
 			passwordIsCorrect(sp.getOwner(),password,Status.FORBIDDEN);
-			if(!sp.getSharedWith().remove(userId+"@"+domainName)) {
+			if(!spreadSheets.unShare(sp,userId+"@"+domainName)) {
 				throw new WebApplicationException( Status.NOT_FOUND );
 			}
 		}
@@ -222,14 +223,15 @@ public class SpreadSheetsSharedMethods {
 	 */
 	public void deleteSpreadsheet(String userId) {
 		synchronized (spreadSheets) {
-			Iterator<Entry<String,Spreadsheet>> it = spreadSheets.entries();
-			Entry<String,Spreadsheet> sp;
-			while(it.hasNext()) {
-				sp=it.next();
-				if(sp.getValue().getOwner().equals(userId)) {
-					it.remove();
-				}
-			}
+//			Iterator<Entry<String,Spreadsheet>> it = spreadSheets.entries();
+//			Entry<String,Spreadsheet> sp;
+//			while(it.hasNext()) {
+//				sp=it.next();
+//				if(sp.getValue().getOwner().equals(userId)) {
+//					it.remove();
+//				}
+//			}
+			spreadSheets.deleteSheetsOfThisUser(userId);
 		}		
 	}
 }

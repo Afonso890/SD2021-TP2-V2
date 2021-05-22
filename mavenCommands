@@ -1,6 +1,6 @@
 .\test-sd-tp1.bat -image sd2021-tp1-55797-55797 -test 2a -sleep 2 -log ALL
 
-.\test-sd-tp2.bat -image sd2021-tp1-xxxxx-55797 -test 101a -sleep 2 -log ALL
+.\test-sd-tp2.bat -image sd2021-tp1-49437-55797 -test 101a -sleep 2 -log ALL
 
 mvn clean compile assembly:single docker:build
 

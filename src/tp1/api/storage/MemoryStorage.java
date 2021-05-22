@@ -34,4 +34,31 @@ public class MemoryStorage implements StorageInterface {
 		return spreadSheets.entrySet().iterator();
 	}
 
+	@Override
+	public void updateCell(Spreadsheet sp, String cell, String rawValue) {
+		sp.setCellRawValue(cell, rawValue);		
+	}
+
+	@Override
+	public boolean share(Spreadsheet sp, String userid) {
+		return sp.getSharedWith().add(userid);
+	}
+
+	@Override
+	public boolean unShare(Spreadsheet sp, String userid) {
+		return sp.getSharedWith().remove(userid);
+	}
+
+	@Override
+	public void deleteSheetsOfThisUser(String userid) {
+		Iterator<Entry<String,Spreadsheet>> it = entries();
+		Entry<String,Spreadsheet> sp;
+		while(it.hasNext()) {
+			sp=it.next();
+			if(sp.getValue().getOwner().equals(userid)) {
+				it.remove();
+			}
+		}
+	}
+
 }
