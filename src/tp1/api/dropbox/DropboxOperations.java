@@ -25,6 +25,7 @@ import tp1.api.consts.Consts;
 import tp1.api.dropbox.args.AccessFileV2Args;
 import tp1.api.dropbox.args.CreateFileArgs;
 import tp1.api.dropbox.args.CreateFolderV2Args;
+import tp1.api.dropbox.args.DeleteBatchArgs;
 import tp1.api.dropbox.args.DownloadFileArgs;
 import tp1.api.dropbox.args.ListFolderArgs;
 import tp1.api.dropbox.args.ListFolderContinueArgs;
@@ -40,6 +41,7 @@ public class DropboxOperations {
 	private static final String UPLOAD_FILE_URL = "https://content.dropboxapi.com/2/files/upload";
 	private static final String DOWNLOAD_FILE_URL = "https://content.dropboxapi.com/2/files/download";
 	private static final String DELETE_FILE_V2_URL = "https://api.dropboxapi.com/2/files/delete_v2";
+	private static final String DELETE_BATCH_URL = "https://api.dropboxapi.com/2/files/delete_batch";
 	private static final String LIST_FOLDER_URL = "https://api.dropboxapi.com/2/files/list_folder";
 	private static final String LIST_FOLDER_CONTINUE_URL = "https://api.dropboxapi.com/2/files/list_folder/continue";
 	private String directoryName;
@@ -84,7 +86,7 @@ public class DropboxOperations {
 	public boolean createFile(Spreadsheet sheet) {
 		OAuthRequest downloadFile = new OAuthRequest(Verb.POST,UPLOAD_FILE_URL);
 		downloadFile.addHeader("Content-Type", Consts.TEXT_CONTENT_TYPE2);
-		String filePath=directoryName+"/"+sheet.getSheetId();
+		String filePath=directoryName+"/"+sheet.getOwner()+"/"+sheet.getSheetId();
 		String args=json.toJson(new CreateFileArgs(filePath));
 		downloadFile.addHeader("Dropbox-API-Arg",args);
 		String msg=json.toJson(sheet);
@@ -208,7 +210,13 @@ public class DropboxOperations {
 				ListFolderReturn reply = json.fromJson(r.getBody(), ListFolderReturn.class);
 				
 				for(FolderEntry e: reply.getEntries()) {
-					sp=Consts.json.fromJson(e.toString(),Spreadsheet.class);
+					System.out.println("Entries " + e.toString());
+					String str = e.toString();
+					str = str.substring(str.lastIndexOf("/"));
+					str= str.substring(1);
+					sp = this.downloadFile(str);
+					System.out.println("SHEEEEEET" + sp);
+					//sp=Consts.json.fromJson(e.toString(),Spreadsheet.class);
 					en=new EntryClass(sp.getSheetId(),sp);
 					spreadSheets.add(en);
 				}

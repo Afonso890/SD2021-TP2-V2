@@ -104,7 +104,7 @@ public class SpreadSheetsSharedMethods {
 				validSheet(sheet);
 				ids++;
 				//UUID.randomUUID().toString();
-				String sheetId = ids+"";
+				String sheetId = ids+"$"+sheet.getOwner();
 				sheet.setSheetId(sheetId);
 				sheet.setSheetURL(uri+"_"+sheet.getSheetId());
 				spreadSheets.put(sheet.getSheetId(),sheet);

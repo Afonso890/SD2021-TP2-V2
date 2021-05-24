@@ -17,6 +17,7 @@ tp1\api\engine\SpreadsheetEngine.class
 sd2021\aula9\dropbox\replies\ListFolderReturn$FolderEntry.class
 tp1\api\storage\MemoryStorage.class
 tp1\api\proxy\DropboxResource.class
+tp1\api\dropbox\args\DeleteBatchArgs.class
 tp1\util\InvalidCellIdException.class
 tp1\api\dropbox\DropboxOperations.class
 tp1\api\spreadsheet\clients\ImportRange.class

@@ -14,7 +14,11 @@ public class DropBoxStorage implements StorageInterface{
 
 	@Override
 	public Spreadsheet get(String sheetid) {
-		return dp.downloadFile(sheetid);
+		String[] arrOfStr = sheetid.split("\\$", 2);
+		if(arrOfStr.length < 2)
+			return null;
+		String path = arrOfStr[1] + "/" + sheetid;
+		return dp.downloadFile(path);
 	}
 
 	@Override
@@ -26,9 +30,16 @@ public class DropBoxStorage implements StorageInterface{
 		return null;
 	}
 
+	
+	public Spreadsheet removeUserFolder(String path) {
+		return dp.delete(path);
+	}
+	
 	@Override
 	public Spreadsheet remove(String sheetid) {
-		return dp.delete(sheetid);
+		String[] arrOfStr = sheetid.split("\\$", 2);
+		String path = arrOfStr[1] + "/" + sheetid;
+		return dp.delete(path);
 	}
 
 	@Override
@@ -66,14 +77,7 @@ public class DropBoxStorage implements StorageInterface{
 
 	@Override
 	public void deleteSheetsOfThisUser(String userid) {
-		Iterator<Entry<String,Spreadsheet>> it = entries();
-		Entry<String,Spreadsheet> sp;
-		while(it.hasNext()) {
-			sp=it.next();
-			if(sp.getValue().getOwner().equals(userid)) {
-				remove(sp.getKey());
-			}
-		}
+		removeUserFolder(userid);
 	}
 
 }
