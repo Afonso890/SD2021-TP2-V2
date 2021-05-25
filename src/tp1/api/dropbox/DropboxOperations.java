@@ -45,19 +45,21 @@ public class DropboxOperations {
 	private static final String LIST_FOLDER_CONTINUE_URL = "https://api.dropboxapi.com/2/files/list_folder/continue";
 	private String directoryName;
 
-	public DropboxOperations(String directoryName) {
+	public DropboxOperations(String directoryName, boolean clean) {
 		service = new ServiceBuilder(Consts.apiKey).apiSecret(Consts.apiSecret).build(DropboxApi20.INSTANCE);
 		accessToken = new OAuth2AccessToken(Consts.accessTokenStr);	
 		json=new Gson();
-		this.directoryName=directoryName;	}
+		this.directoryName="/sdtp2"+directoryName;
+		createFolder(clean);
+	}
 	
 	
 	
-	public boolean createFolder() {
+	private boolean createFolder(boolean clean) {
 		OAuthRequest createFolder = new OAuthRequest(Verb.POST, CREATE_FOLDER_V2_URL);
-		createFolder.addHeader("Content-Type", JSON_CONTENT_TYPE);
+		createFolder.addHeader("Content-Type",JSON_CONTENT_TYPE);
 
-		createFolder.setPayload(Consts.json.toJson(new CreateFolderV2Args(directoryName, false)));
+		createFolder.setPayload(Consts.json.toJson(new CreateFolderV2Args(directoryName,clean)));
 		
 		service.signRequest(accessToken, createFolder);
 		

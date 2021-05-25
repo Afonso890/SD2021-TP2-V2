@@ -9,13 +9,13 @@ import tp1.api.dropbox.DropboxOperations;
 
 public class DropBoxStorage implements StorageInterface{
 	DropboxOperations dp;
-	public DropBoxStorage(String domainName) {
-		dp=new DropboxOperations("/"+domainName);
+	public DropBoxStorage(String domainName, boolean clean) {
+		dp=new DropboxOperations("/"+domainName,clean);
 	}
 
 	@Override
 	public Spreadsheet get(String sheetid) {
-		String[] arrOfStr = sheetid.split("\\$", 2);
+		String[] arrOfStr = sheetid.split("\\$",2);
 		if(arrOfStr.length < 2)
 			return null;
 		String path = arrOfStr[1] + "/" + sheetid;
@@ -30,7 +30,6 @@ public class DropBoxStorage implements StorageInterface{
 		}
 		return null;
 	}
-
 	
 	public Spreadsheet removeUserFolder(String path) {
 		return dp.delete(path);
