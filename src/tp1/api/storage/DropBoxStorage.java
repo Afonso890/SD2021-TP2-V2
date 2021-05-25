@@ -1,5 +1,6 @@
 package tp1.api.storage;
 import java.util.Iterator;
+
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -45,10 +46,7 @@ public class DropBoxStorage implements StorageInterface{
 	@Override
 	public Iterator<Entry<String, Spreadsheet>> entries() {
 		List<Entry<String,Spreadsheet>> sheets = dp.listDirectory();
-		if(sheets!=null) {
-			return sheets.iterator();
-		}
-		return null;
+		return sheets.iterator();
 	}
 
 	@Override
@@ -77,7 +75,7 @@ public class DropBoxStorage implements StorageInterface{
 
 	@Override
 	public void deleteSheetsOfThisUser(String userid) {
-		removeUserFolder(userid);
+		this.removeUserFolder(userid);
 	}
 
 }
