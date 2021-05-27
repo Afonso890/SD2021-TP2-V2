@@ -50,16 +50,19 @@ public class DropboxOperations {
 		accessToken = new OAuth2AccessToken(Consts.accessTokenStr);	
 		json=new Gson();
 		this.directoryName="/sdtp2"+directoryName;
-		createFolder(clean);
+		if(!clean) {
+			delete(null);
+		}
+		createFolder();
 	}
 	
 	
 	
-	private boolean createFolder(boolean clean) {
+	private boolean createFolder() {
 		OAuthRequest createFolder = new OAuthRequest(Verb.POST, CREATE_FOLDER_V2_URL);
 		createFolder.addHeader("Content-Type",JSON_CONTENT_TYPE);
 
-		createFolder.setPayload(Consts.json.toJson(new CreateFolderV2Args(directoryName,clean)));
+		createFolder.setPayload(Consts.json.toJson(new CreateFolderV2Args(directoryName,false)));
 		
 		service.signRequest(accessToken, createFolder);
 		
@@ -153,8 +156,13 @@ public class DropboxOperations {
 		OAuthRequest deleteFile = new OAuthRequest(Verb.POST, DELETE_FILE_V2_URL);
 		deleteFile.addHeader("Content-Type", JSON_CONTENT_TYPE);
 		
-		String filePath=directoryName +"/"+sheetid;
-		
+		String filePath;
+		if(sheetid==null) {
+			//remove the directory
+			filePath=directoryName;
+		}else {
+			filePath=directoryName +"/"+sheetid;
+		}
 		deleteFile.setPayload(json.toJson(new AccessFileV2Args(filePath)));
 		service.signRequest(accessToken, deleteFile);
 		
@@ -182,6 +190,12 @@ public class DropboxOperations {
 			return null;
 		}
 		return sp;
+	}
+	
+	public static void main(String [] args) {
+		//TESTING PURPOSE
+		String path="/danieljoao";
+		DropboxOperations dp = new DropboxOperations(path,false);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
