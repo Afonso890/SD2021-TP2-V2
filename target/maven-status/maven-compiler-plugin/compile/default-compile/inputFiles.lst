@@ -4,6 +4,8 @@ C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\Spreadsheet.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\service\soap\SoapUsers.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\workers\DeleteSpreadSheetWorker.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\discovery\Discovery.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\replication\KafkaSubscriber.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\replication\sync\SyncPoint.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\util\EntryClass.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\dropbox\args\DeleteBatchArgs.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\service\soap\util\Spreadsheets.java
@@ -16,8 +18,11 @@ C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\util\CellRange.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\dropbox\args\ListFolderArgs.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\storage\DropBoxStorage.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\sd2021\aula9\dropbox\replies\ListFolderReturn.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\replication\ZookeeperProcessor.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\util\InvalidCellIdException.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\server\rest\SpreadSheetsServer.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\replication\KafkaPublisher.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\replication\KafkaUtils.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\service\soap\UsersWS.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\util\InsecureHostnameVerifier.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\servers\resources\UsersResourcesSharedMethods.java
@@ -33,6 +38,7 @@ C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\discovery\ClientDiscovery.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\servers\resources\UsersResource.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\dropbox\replies\ListFolderReturn.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\engine\SpreadsheetEngine.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\server\rest\ReplicatedSpreadSheetsServer.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\service\rest\RestUsers.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\clients\GetUserClient.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\dropbox\args\CreateFolderV2Args.java
@@ -47,6 +53,7 @@ C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\impl\engine\SpreadsheetEngineImpl.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\spreadsheet\clients\DeleteSpreadSheetClient.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\dropbox\args\ListFolderContinueArgs.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\proxy\DropboxResource.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\replication\RecordProcessor.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\service\soap\SheetsException.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\spreadsheet\clients\ImportRange.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\engine\AbstractSpreadsheet.java
