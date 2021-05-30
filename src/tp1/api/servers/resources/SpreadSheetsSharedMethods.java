@@ -1,8 +1,6 @@
 package tp1.api.servers.resources;
 
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map.Entry;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Client;
@@ -15,8 +13,8 @@ import tp1.api.discovery.Discovery;
 import tp1.api.server.rest.UsersServer;
 import tp1.api.storage.StorageInterface;
 import tp1.impl.engine.SpreadsheetEngineImpl;
-import tp1.util.CellRange;
 import tp1.util.GetAbstractSpreadSheet;
+import tp1.util.Pair;
 
 public class SpreadSheetsSharedMethods {
 	//private static Logger Log = Logger.getLogger(SpreadSheetResource.class.getName());
@@ -163,15 +161,14 @@ public class SpreadSheetsSharedMethods {
 	}
 	//import range
 	
-	public String[][] importRange(String sheetId,String range,String email) {
-		
+	public Pair<Long,String[][]> importRange(String sheetId,String range,String email) {
 		Spreadsheet sp = hasSpreadSheet(sheetId);
-		CellRange r = new CellRange( range );
+		//CellRange r = new CellRange( range );
 		String [][] values;
 		String userId = email.split("@")[0];
 		if(sp.getOwner().equals(userId)||sp.getSharedWith().contains(email)){
 			values=SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(GetAbstractSpreadSheet.getTheOne(sp,domainName,client));
-			return values = r.extractRangeValuesFrom(values);
+			return new Pair<Long, String[][]>(sp.getTw_server(),values);
 		}else {
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}	
@@ -189,10 +186,7 @@ public class SpreadSheetsSharedMethods {
 			//cachedValues.remove(sheetId);
 			spreadSheets.updateCell(sp,cell,rawValue);
 		}
-		
 	}
-	
-	
 	public void shareSpreadsheet(String sheetId, String userId, String password) {
 		synchronized (spreadSheets) {
 			Spreadsheet sp=hasSpreadSheet(sheetId);
@@ -223,14 +217,6 @@ public class SpreadSheetsSharedMethods {
 	 */
 	public void deleteSpreadsheet(String userId) {
 		synchronized (spreadSheets) {
-//			Iterator<Entry<String,Spreadsheet>> it = spreadSheets.entries();
-//			Entry<String,Spreadsheet> sp;
-//			while(it.hasNext()) {
-//				sp=it.next();
-//				if(sp.getValue().getOwner().equals(userId)) {
-//					it.remove();
-//				}
-//			}
 			spreadSheets.deleteSheetsOfThisUser(userId);
 		}		
 	}

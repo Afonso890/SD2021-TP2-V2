@@ -24,7 +24,6 @@ public class SpreadsheetEngineImpl implements SpreadsheetEngine {
 	
 	
 	public String[][] computeSpreadsheetValues(AbstractSpreadsheet sheet) {
-		//System.out.println("I AM GONNNA MAKE YOU SUFFER,ENTERING -+++++++++++++++++++++++++++ "+sheet);
 		ExcelFile workbook = new ExcelFile();
 		ExcelWorksheet worksheet = workbook.addWorksheet(sheet.sheetId());
 
@@ -34,12 +33,6 @@ public class SpreadsheetEngineImpl implements SpreadsheetEngine {
 				ExcelCell cell = worksheet.getCell(i, j);
 				setCell(sheet, worksheet, cell, rawVal);
 			}
-
-//		try {
-//			workbook.save("/tmp/" + sheet.sheetId() + ".xls");
-//		} catch( Exception x ) {
-//			x.printStackTrace();
-//		}
 		worksheet.calculate();
 
 		var cells = new String[sheet.rows()][sheet.columns()];

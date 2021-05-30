@@ -6,6 +6,7 @@ import tp1.api.Spreadsheet;
 import tp1.api.discovery.Discovery;
 import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.storage.StorageInterface;
+import tp1.util.Pair;
 
 @Singleton
 public class SpreadSheetResource implements RestSpreadsheets{
@@ -37,7 +38,7 @@ public class SpreadSheetResource implements RestSpreadsheets{
 	}
 	//import range
 	@Override
-	public String[][] importRange(String sheetId, String range,String email) {
+	public Pair<Long,String[][]> importRange(String sheetId, String range,String email) {
 		return resource.importRange(sheetId,range,email);
 	}
 

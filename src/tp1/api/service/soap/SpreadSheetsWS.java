@@ -5,6 +5,7 @@ import tp1.api.Spreadsheet;
 import tp1.api.discovery.Discovery;
 import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 import tp1.api.storage.StorageInterface;
+import tp1.util.Pair;
 
 @WebService(serviceName=SoapSpreadsheets.NAME, targetNamespace=SoapSpreadsheets.NAMESPACE, endpointInterface=SoapSpreadsheets.INTERFACE)
 public class SpreadSheetsWS implements SoapSpreadsheets{
@@ -78,7 +79,7 @@ public class SpreadSheetsWS implements SoapSpreadsheets{
 		}
 	}
 	@Override
-	public String[][] importRange(String sheetId, String range,String email) throws SheetsException {
+	public Pair<Long,String[][]> importRange(String sheetId, String range,String email) throws SheetsException {
 		try{
 			return resource.importRange(sheetId,range,email);
 		}catch(Exception e) {

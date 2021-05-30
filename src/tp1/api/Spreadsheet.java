@@ -18,12 +18,22 @@ public class Spreadsheet {
 	// number of the lines and columns
 	private int rows, columns;
 	// set of users with which ths sheet is shared
-	
 	private Set<String> sharedWith;
 	
 	// raw contents of the sheet
 	private String[][] rawValues;
 	
+	//date of the last modification in the server
+	private long tw_server;
+	
+	public long getTw_server() {
+		return tw_server;
+	}
+
+	public void setTw_server(long tw_server) {
+		this.tw_server = tw_server;
+	}
+
 	public Spreadsheet() {	
 	}
 
@@ -96,13 +106,13 @@ public class Spreadsheet {
 		this.sharedWith = sharedWith;
 	}
 
-	
 	public String[][] getRawValues() {
 		return rawValues;
 	}
 
 	public void setRawValues(String[][] rawValues) {
 		this.rawValues = rawValues;
+		setTw_server(System.currentTimeMillis());
 	}
 
 	/**

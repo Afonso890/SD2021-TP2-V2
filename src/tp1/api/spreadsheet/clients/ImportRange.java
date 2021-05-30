@@ -1,7 +1,6 @@
 package tp1.api.spreadsheet.clients;
 
 import java.net.URL;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.namespace.QName;
 
@@ -18,18 +17,25 @@ import jakarta.xml.ws.Service;
 import jakarta.xml.ws.WebServiceException;
 import tp1.api.consts.Consts;
 import tp1.api.discovery.Discovery;
+import tp1.api.nfs_cache.SheetsCache;
 import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.service.soap.SoapSpreadsheets;
 import tp1.util.InsecureHostnameVerifier;
+import tp1.util.Pair;
 
 public class ImportRange {
 
 	public final static String SHEETS_WSDL = "/spreadsheets/?wsdl";
-
-	
+	private final static SheetsCache cache = new SheetsCache();
+		
+	@SuppressWarnings("unchecked")
 	public static String [][] importRange(String url, String range, String email,Client client) {
 		String urls [] = url.split("_");
 		String sheetId=urls[1];
+		String [][] values=cache.getValues(sheetId, range); 
+		if(values!=null) {
+			return values;
+		}
 		url=urls[0];
 		urls=url.split("/");
 		//HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
@@ -57,10 +63,15 @@ public class ImportRange {
 						.request()
 						.accept(MediaType.APPLICATION_JSON)
 						.get();
-				if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() )
-					return r.readEntity(String[][].class);
-				else
+				if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
+					Pair<Long,String[][]> result;
+					result = r.readEntity(Pair.class);
+					cache.addValues(result.getValue2(), sheetId,result.getValue1());
+					return cache.extractValues(result.getValue2(),range);	
+				}				
+				else {
 					System.out.println("Error, HTTP error status: " + r.getStatus() );
+				}
 				success = true;
 			} catch (ProcessingException pe) {
 				System.out.println("Timeout occurred");
@@ -72,7 +83,7 @@ public class ImportRange {
 				System.out.println("Retrying to execute request.");
 			}
 		}
-		return null;
+		return cache.getValuesInFailure(sheetId,range);
 	}
 	private static String [][] importRangeSoap(String url, String range, String sheetId,String email){
 		//Obtaining s stub for the remote soap service
@@ -101,10 +112,11 @@ public class ImportRange {
 
 				while(!success && retries <Consts.MAX_RETRIES) {
 					try {
-						String [][] values =null;
-						values = sheets.importRange(sheetId,range,email);
+						Pair<Long,String[][]> result;
+						result = sheets.importRange(sheetId,range,email);
+						cache.addValues(result.getValue2(),sheetId,result.getValue1());
 						success = true;
-						return values;
+						return cache.extractValues(result.getValue2(),range);	
 					} catch (tp1.api.service.soap.SheetsException e) {
 						System.out.println("Cound not get import range: " + e.getMessage());
 						success = true;
@@ -118,8 +130,7 @@ public class ImportRange {
 						System.out.println("Retrying to execute request.");
 					}
 				}
-				return null;
-
+				return cache.getValuesInFailure(sheetId,range);
 			}
 	}
 

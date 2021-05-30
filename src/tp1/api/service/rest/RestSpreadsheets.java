@@ -12,6 +12,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import tp1.api.Spreadsheet;
+import tp1.util.Pair;
 
 
 @Path(RestSpreadsheets.PATH)
@@ -108,7 +109,7 @@ public interface RestSpreadsheets {
 	@GET
 	@Path("/{sheetId}/{range}/{email}")
 	@Produces(MediaType.APPLICATION_JSON)
-	String[][] importRange(@PathParam("sheetId") String sheetId, @PathParam("range") String range,@PathParam("email") String email);
+	Pair<Long,String[][]> importRange(@PathParam("sheetId") String sheetId, @PathParam("range") String range,@PathParam("email") String email);
 	
 
 	/**
