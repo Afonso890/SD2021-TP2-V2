@@ -17,8 +17,8 @@ tp1\api\replication\KafkaPublisher.class
 tp1\api\service\soap\SoapUsers.class
 tp1\api\engine\SpreadsheetEngine.class
 sd2021\aula9\dropbox\replies\ListFolderReturn$FolderEntry.class
+tp1\api\nfs_cache\SheetWrapperServer.class
 tp1\api\storage\MemoryStorage.class
-tp1\api\proxy\DropboxResource.class
 tp1\api\replication\KafkaSubscriber$SubscriberListener.class
 tp1\api\dropbox\args\DeleteBatchArgs.class
 tp1\util\InvalidCellIdException.class
@@ -35,9 +35,12 @@ tp1\util\InsecureHostnameVerifier.class
 tp1\api\engine\AbstractSpreadsheet.class
 tp1\api\consts\Consts.class
 tp1\api\dropbox\replies\ListFolderReturn.class
+tp1\api\nfs_cache\SheetsCache.class
 tp1\api\Spreadsheet.class
+tp1\api\SpreadsheetValuesWrapper.class
 tp1\util\EntryClass.class
 tp1\api\dropbox\args\ListFolderArgs.class
+tp1\api\nfs_cache\SheetWrapperClient.class
 tp1\api\replication\KafkaSubscriber.class
 tp1\api\dropbox\args\CreateFileArgs.class
 tp1\impl\engine\SpreadsheetEngineImpl.class
@@ -63,6 +66,8 @@ tp1\api\service\soap\SpreadSheetsServerSoap.class
 tp1\util\GetAbstractSpreadSheet$1.class
 tp1\util\GetAbstractSpreadSheet.class
 tp1\api\replication\sync\SyncPoint.class
+tp1\util\Pair.class
 tp1\api\replication\RecordProcessor.class
 tp1\api\service\soap\SoapSpreadsheets.class
+tp1\api\SpreadsheetWrapper.class
 tp1\api\dropbox\args\AccessFileV2Args.class

@@ -6,32 +6,43 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import tp1.api.Spreadsheet;
+import tp1.api.SpreadsheetWrapper;
 
 public class MemoryStorage implements StorageInterface {
-	private Map<String,Spreadsheet> spreadSheets;
+	private Map<String,SpreadsheetWrapper> spreadSheets;
+
 
 	public MemoryStorage() {
-		spreadSheets = new HashMap<String, Spreadsheet>();
+		spreadSheets = new HashMap<String, SpreadsheetWrapper>();
 	}
 
 	@Override
 	public Spreadsheet get(String sheetid) {
-		return spreadSheets.get(sheetid);
+		try {
+			return spreadSheets.get(sheetid).getSheet();
+		}catch(Exception e) {
+			return null;
+		}
 	}
 
 	@Override
 	public Spreadsheet put(String sheetid, Spreadsheet sheet) {
-		return spreadSheets.put(sheetid, sheet);
+		SpreadsheetWrapper sw = new SpreadsheetWrapper(sheet,System.currentTimeMillis());
+		try {
+			sheet = spreadSheets.put(sheetid,sw).getSheet();
+		}catch(Exception e) {
+			sheet=null;
+		}
+		return sheet;
 	}
 
 	@Override
 	public Spreadsheet remove(String sheetid) {
-		return spreadSheets.remove(sheetid);
-	}
-
-	@Override
-	public Iterator<Entry<String, Spreadsheet>> entries() {
-		return spreadSheets.entrySet().iterator();
+		try {
+			return spreadSheets.remove(sheetid).getSheet();
+		}catch(Exception e) {
+			return null;
+		}
 	}
 
 	@Override
@@ -51,14 +62,19 @@ public class MemoryStorage implements StorageInterface {
 
 	@Override
 	public void deleteSheetsOfThisUser(String userid) {
-		Iterator<Entry<String,Spreadsheet>> it = entries();
-		Entry<String,Spreadsheet> sp;
+		Iterator<Entry<String,SpreadsheetWrapper>> it = spreadSheets.entrySet().iterator();
+		Entry<String,SpreadsheetWrapper> sp;
 		while(it.hasNext()) {
 			sp=it.next();
-			if(sp.getValue().getOwner().equals(userid)) {
+			if(sp.getValue().getSheet().getOwner().equals(userid)) {
 				it.remove();
 			}
 		}
 	}
 
+	@Override
+	public SpreadsheetWrapper getSpreadsheet(String sheetid) {
+		// TODO Auto-generated method stub
+		return spreadSheets.get(sheetid);
+	}
 }

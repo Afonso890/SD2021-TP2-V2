@@ -2,10 +2,13 @@ package tp1.api.servers.resources;
 
 import java.util.HashSet;
 
+
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.Response.Status;
 import tp1.api.Spreadsheet;
+import tp1.api.SpreadsheetValuesWrapper;
+import tp1.api.SpreadsheetWrapper;
 import tp1.api.User;
 import tp1.api.clients.GetUserClient;
 import tp1.api.consts.Consts;
@@ -14,7 +17,6 @@ import tp1.api.server.rest.UsersServer;
 import tp1.api.storage.StorageInterface;
 import tp1.impl.engine.SpreadsheetEngineImpl;
 import tp1.util.GetAbstractSpreadSheet;
-import tp1.util.Pair;
 
 public class SpreadSheetsSharedMethods {
 	//private static Logger Log = Logger.getLogger(SpreadSheetResource.class.getName());
@@ -161,14 +163,19 @@ public class SpreadSheetsSharedMethods {
 	}
 	//import range
 	
-	public Pair<Long,String[][]> importRange(String sheetId,String range,String email) {
-		Spreadsheet sp = hasSpreadSheet(sheetId);
+	public SpreadsheetValuesWrapper importRange(String sheetId,String range,String email) {
+		SpreadsheetWrapper spw = spreadSheets.getSpreadsheet(sheetId);
+		if(spw==null) {
+			throw new WebApplicationException( Status.NOT_FOUND );
+		}
+		Spreadsheet sp = spw.getSheet();
+
 		//CellRange r = new CellRange( range );
 		String [][] values;
 		String userId = email.split("@")[0];
 		if(sp.getOwner().equals(userId)||sp.getSharedWith().contains(email)){
 			values=SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(GetAbstractSpreadSheet.getTheOne(sp,domainName,client));
-			return new Pair<Long, String[][]>(sp.getTw_server(),values);
+			return new  SpreadsheetValuesWrapper(values,spw.getTw_server()); // Pair<Long, String[][]>(spw.getTw_server(),values);
 		}else {
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}	

@@ -1,9 +1,7 @@
 package tp1.api.storage;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-
 import tp1.api.Spreadsheet;
+import tp1.api.SpreadsheetWrapper;
 
 public interface StorageInterface {
 	
@@ -12,9 +10,7 @@ public interface StorageInterface {
 	public Spreadsheet put(String sheetid, Spreadsheet sheet);
 	
 	public Spreadsheet remove(String sheetid);
-	
-	public Iterator<Entry<String,Spreadsheet>> entries();
-	
+		
 	public void updateCell(Spreadsheet sp, String cell, String rawValue);
 	
 	/**
@@ -37,6 +33,8 @@ public interface StorageInterface {
 	 * @param userid
 	 */
 	public void deleteSheetsOfThisUser(String userid);
+	
+	public SpreadsheetWrapper getSpreadsheet(String sheetid);
 
 
 

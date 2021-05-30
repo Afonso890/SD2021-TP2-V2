@@ -2,8 +2,9 @@ package tp1.api.service.soap;
 
 import jakarta.jws.WebService;
 
+
 import tp1.api.Spreadsheet;
-import tp1.util.Pair;
+import tp1.api.SpreadsheetValuesWrapper;
 
 @WebService(serviceName=SoapSpreadsheets.NAME, targetNamespace=SoapSpreadsheets.NAMESPACE, endpointInterface=SoapSpreadsheets.INTERFACE)
 public interface SoapSpreadsheets{
@@ -98,5 +99,5 @@ public interface SoapSpreadsheets{
 	 */
 	String[][] getSpreadsheetValues(String sheetId, String userId, String password) throws SheetsException;
 	
-	Pair<Long,String[][]> importRange(String sheetId, String range,String email) throws SheetsException;
+	SpreadsheetValuesWrapper importRange(String sheetId, String range,String email) throws SheetsException;
 }

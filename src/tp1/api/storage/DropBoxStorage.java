@@ -1,10 +1,6 @@
 package tp1.api.storage;
-import java.util.Iterator;
-
-import java.util.List;
-import java.util.Map.Entry;
-
 import tp1.api.Spreadsheet;
+import tp1.api.SpreadsheetWrapper;
 import tp1.api.dropbox.DropboxOperations;
 
 public class DropBoxStorage implements StorageInterface{
@@ -13,18 +9,27 @@ public class DropBoxStorage implements StorageInterface{
 		dp=new DropboxOperations("/"+domainName,clean);
 	}
 
-	@Override
-	public Spreadsheet get(String sheetid) {
+	private SpreadsheetWrapper getAux(String sheetid) {
 		String[] arrOfStr = sheetid.split("\\$",2);
 		if(arrOfStr.length < 2)
 			return null;
 		String path = arrOfStr[1] + "/" + sheetid;
 		return dp.downloadFile(path);
 	}
+	@Override
+	public Spreadsheet get(String sheetid) {
+		SpreadsheetWrapper sp = getAux(sheetid);
+		try {
+			return sp.getSheet();
+		}catch(Exception e) {
+			return null;
+		}
+	}
 
 	@Override
 	public Spreadsheet put(String sheetid, Spreadsheet sheet) {
-		boolean added=dp.createFile(sheet);
+		SpreadsheetWrapper sw = new SpreadsheetWrapper(sheet,System.currentTimeMillis());
+		boolean added=dp.createFile(sw);
 		if(added) {
 			return sheet;
 		}
@@ -32,25 +37,27 @@ public class DropBoxStorage implements StorageInterface{
 	}
 	
 	public Spreadsheet removeUserFolder(String path) {
-		return dp.delete(path);
+		try {
+			return dp.delete(path).getSheet();
+		}catch(Exception e) {
+			return null;
+		}
 	}
 	
 	@Override
 	public Spreadsheet remove(String sheetid) {
 		String[] arrOfStr = sheetid.split("\\$", 2);
 		String path = arrOfStr[1] + "/" + sheetid;
-		return dp.delete(path);
-	}
-
-	@Override
-	public Iterator<Entry<String, Spreadsheet>> entries() {
-		List<Entry<String,Spreadsheet>> sheets = dp.listDirectory();
-		return sheets.iterator();
+		try {
+			return dp.delete(path).getSheet();
+		}catch(Exception e) {
+			return null;
+		}
 	}
 
 	@Override
 	public void updateCell(Spreadsheet sp, String cell, String rawValue) {
-		sp.setCellRawValue(cell, rawValue);
+		sp.setCellRawValue(cell,rawValue);
 		put(sp.getSheetId(),sp);
 	}
 
@@ -75,6 +82,12 @@ public class DropBoxStorage implements StorageInterface{
 	@Override
 	public void deleteSheetsOfThisUser(String userid) {
 		this.removeUserFolder(userid);
+	}
+
+	@Override
+	public SpreadsheetWrapper getSpreadsheet(String sheetid) {
+		// TODO Auto-generated method stub
+		return getAux(sheetid);
 	}
 
 }
