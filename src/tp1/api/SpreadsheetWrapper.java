@@ -5,6 +5,7 @@ public class SpreadsheetWrapper {
 	private Spreadsheet sheet;
 	//date of the last modification in the server
 	private long tw_server;
+	public SpreadsheetWrapper() {}
 	public SpreadsheetWrapper(Spreadsheet sp, long tw_server) {
 		this.sheet=sp;
 		this.tw_server=tw_server;
