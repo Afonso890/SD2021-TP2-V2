@@ -18,9 +18,9 @@ public class SheetWrapperClient extends SheetWrapperServer {
 	public boolean validCacheEntry(long timeInterval) {
 		long currentTime = System.currentTimeMillis();
 		boolean valid = currentTime-tc<timeInterval;
-		if(valid) {
-			tc=System.currentTimeMillis();
-		}
+		//if(valid) {
+			//tc=System.currentTimeMillis();
+		//}
 		return valid;
 	}
 

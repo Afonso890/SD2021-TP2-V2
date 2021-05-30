@@ -3,8 +3,6 @@ package tp1.api;
 import java.util.Set;
 
 import tp1.util.CellRange;
-
-
 /**
  * Represents a spreadsheet.
  */
@@ -22,18 +20,7 @@ public class Spreadsheet {
 	
 	// raw contents of the sheet
 	private String[][] rawValues;
-	
-	//date of the last modification in the server
-	private long tw_server;
-	
-	public long getTw_server() {
-		return tw_server;
-	}
-
-	public void setTw_server(long tw_server) {
-		this.tw_server = tw_server;
-	}
-
+		
 	public Spreadsheet() {	
 	}
 
@@ -112,7 +99,6 @@ public class Spreadsheet {
 
 	public void setRawValues(String[][] rawValues) {
 		this.rawValues = rawValues;
-		setTw_server(System.currentTimeMillis());
 	}
 
 	/**
