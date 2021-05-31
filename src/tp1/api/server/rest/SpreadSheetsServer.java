@@ -12,6 +12,7 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.api.discovery.Discovery;
+import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetResource;
 import tp1.api.storage.MemoryStorage;
 import tp1.api.storage.StorageInterface;
