@@ -4,6 +4,7 @@ import jakarta.inject.Singleton;
 import tp1.api.Spreadsheet;
 import tp1.api.SpreadsheetValuesWrapper;
 import tp1.api.discovery.Discovery;
+import tp1.api.replication.sync.SyncPoint;
 import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.storage.StorageInterface;
 
@@ -12,14 +13,18 @@ public class SpreadSheetResource implements RestSpreadsheets{
 	//private static Logger Log = Logger.getLogger(SpreadSheetResource.class.getName());
 
 	private final SpreadSheetsSharedMethods resource;
-
 	public SpreadSheetResource(String domainName, Discovery martian,String uri, StorageInterface spreadSheets) {
-		resource = new SpreadSheetsSharedMethods(domainName, martian, uri,spreadSheets);
+		resource = new SpreadSheetsSharedMethods(domainName, martian, uri, spreadSheets);
+	}
+	public String getDomain() {
+		return resource.getDomain();
 	}
 	
 	@Override
 	public String createSpreadsheet(Spreadsheet sheet, String password) {
-		return resource.createSpreadsheet(sheet, password);
+		String result = resource.createSpreadsheet(sheet, password);
+		//publish
+		return result;
 	}
 
 	@Override

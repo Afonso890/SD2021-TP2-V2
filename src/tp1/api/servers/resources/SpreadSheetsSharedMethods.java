@@ -96,6 +96,9 @@ public class SpreadSheetsSharedMethods {
 			throw new WebApplicationException( Status.CONFLICT );
 		}
 	}
+	public String getDomain() {
+		return domainName;
+	}
 	
 	public String createSpreadsheet(Spreadsheet sheet, String password) {
 		passwordIsCorrect(sheet.getOwner(),password,Status.BAD_REQUEST);
