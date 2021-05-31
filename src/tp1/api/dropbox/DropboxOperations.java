@@ -38,7 +38,8 @@ public class DropboxOperations {
 		accessToken = new OAuth2AccessToken(Consts.accessTokenStr);	
 		json=new Gson();
 		this.directoryName="/sdtp2"+directoryName;
-		if(!clean) {
+		System.out.println("BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOL LLLLLLLLLLLLLLLLLLLLLLLL -> "+clean);
+		if(clean) {
 			delete(null);
 		}
 		createFolder();
