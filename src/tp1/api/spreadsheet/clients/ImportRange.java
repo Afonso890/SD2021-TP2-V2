@@ -62,6 +62,7 @@ public class ImportRange {
 
 		short retries = 0;
 		boolean success = false;
+		System.out.println("GOING TO imporrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrt --------------------------------------------> REST");
 
 		while(!success && retries <Consts.MAX_RETRIES) {
 			try {
@@ -81,7 +82,7 @@ public class ImportRange {
 				}
 				success = true;
 			} catch (ProcessingException pe) {
-				System.out.println("Timeout occurred");
+				System.out.println("Timeout occurred .............................................................................................. FALHA REST");
 				pe.printStackTrace();
 				retries++;
 				try { Thread.sleep(Consts.RETRY_PERIOD ); } catch (InterruptedException e) {
@@ -90,10 +91,13 @@ public class ImportRange {
 				System.out.println("Retrying to execute request.");
 			}
 		}
+		System.out.println("GOING TO RETURN BECAUSE THERE IS FAILURE --------------------------------------------> REST");
 		return cache.getValuesInFailure(sheetId,range);
 	}
 	private static String [][] importRangeSoap(String url, String range, String sheetId,String email){
 		//Obtaining s stub for the remote soap service
+		System.out.println("SOAPING TO imporrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrt --------------------------------------------> REST");
+
 				SoapSpreadsheets sheets = null;
 				HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 				try {
@@ -128,7 +132,7 @@ public class ImportRange {
 						System.out.println("Cound not get import range: " + e.getMessage());
 						success = true;
 					} catch (WebServiceException wse) {
-						System.out.println("Communication error.");
+						System.out.println("Communication error.------------------------------------------------------------------FALHA SOAP");
 						wse.printStackTrace();
 						retries++;
 						try { Thread.sleep(Consts.RETRY_PERIOD ); } catch (InterruptedException e) {
@@ -137,6 +141,7 @@ public class ImportRange {
 						System.out.println("Retrying to execute request.");
 					}
 				}
+				System.out.println("GOING TO RETURN BECAUSE THERE IS FAILURE --------------------------------------------> FAILURE");
 				return cache.getValuesInFailure(sheetId,range);
 			}
 	
