@@ -13,34 +13,27 @@ public class GetAbstractSpreadSheet {
 			
 			@Override
 			public String sheetId() {
-				// TODO Auto-generated method stub
 				return sp.getSheetId();
 			}
 			
 			@Override
 			public int rows() {
-				// TODO Auto-generated method stub
 				return sp.getRows();
 			}
 			
 			@Override
 			public String[][] getRangeValues(String sheetURL, String range) {
-				// TODO Auto-generated method stub
-				//getValues from the sheetURL server
-				//CellRange r = new CellRange( range );
-				//String [] uris = martian.knownUrisOf(sheetURL);
+				
 				return ImportRange.importRange(sheetURL,range,sp.getOwner()+"@"+domain,client);
 			}
 			
 			@Override
 			public int columns() {
-				// TODO Auto-generated method stub
 				return sp.getColumns();
 			}
 			
 			@Override
 			public String cellRawValue(int row, int col) {
-				// TODO Auto-generated method stub
 				return sp.getCellRawValue(row, col);
 			}
 		};

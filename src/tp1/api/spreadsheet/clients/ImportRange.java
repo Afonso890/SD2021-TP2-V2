@@ -1,10 +1,16 @@
 package tp1.api.spreadsheet.clients;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.namespace.QName;
 
+import com.google.gson.Gson;
 import com.sun.xml.ws.client.BindingProviderProperties;
 
 import jakarta.ws.rs.ProcessingException;
@@ -22,35 +28,60 @@ import tp1.api.discovery.Discovery;
 import tp1.api.nfs_cache.SheetsCache;
 import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.service.soap.SoapSpreadsheets;
+import tp1.util.GoogleReturnValues;
 import tp1.util.InsecureHostnameVerifier;
 
 public class ImportRange {
 
 	public final static String SHEETS_WSDL = "/spreadsheets/?wsdl";
 	private final static SheetsCache cache = new SheetsCache();
+	private static String apiKey ="AIzaSyBlavaHw1h9Th_RouiUa70iMWAhB18oizk";
 		
 	public static String [][] importRange(String url, String range, String email,Client client) {
-		String urls [] = url.split("_");
-		String sheetId=urls[1];
-		String [][] values=cache.getValues(sheetId,range); 
-		if(values!=null) {
-			return values;
+		
+		String sheetId;
+		String urls [];
+		if(url.contains("google"))
+		{
+		     urls = url.split("/");
+			 sheetId=urls[3];
 		}
-		url=urls[0];
-		urls=url.split("/");
-		//HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
+		else
+		{
+		    urls  = url.split("_");
+			sheetId=urls[1];
+			String [][] values=cache.getValues(sheetId,range); 
+			if(values!=null) {
+				return values;
+			}
+			url=urls[0];
+			urls=url.split("/");
+		}
+
+		if(url.contains("google"))
+		{
+			String urlGoogle =  url.substring(0, 30);
+			urlGoogle = urlGoogle + "v4/spreadsheets/" + sheetId + "/values/" + range + "?key=" + apiKey;
+			String googleReturnJson = "";
+			try {
+				googleReturnJson = importRangeGoogle(urlGoogle);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			 Gson gson = new Gson();
+
+			    // 1. JSON file to Java object
+			 GoogleReturnValues values = gson.fromJson(googleReturnJson, GoogleReturnValues.class);
+			 String mat[][] = values.getValues();
+		        
+		   return mat;     
+
+		}
 		if(Discovery.SOAP.equals(urls[urls.length-1])) {
 			return importRangeSoap(url,range, sheetId, email);
 		}
-		/*
-		ClientConfig config = new ClientConfig();
-		//how much time until we timeout when opening the TCP connection to the server
-		config.property(ClientProperties.CONNECT_TIMEOUT,Consts.CONNECTION_TIMEOUT);
-		//how much time do we wait for the reply of the server after sending the request
-		config.property(ClientProperties.READ_TIMEOUT, Consts.CONNECTION_TIMEOUT);
-		Client client = ClientBuilder.newClient(config);*/
-		//System.out.println("Sending request to server: "+serviceId);
-		//System.out.println("GETTING SPREADSHEET, PATH: "+serverUrl);
 		WebTarget target = client.target(url).path(RestSpreadsheets.PATH);
 
 		short retries = 0;
@@ -132,5 +163,28 @@ public class ImportRange {
 				}
 				return cache.getValuesInFailure(sheetId,range);
 			}
+	
+	public static String importRangeGoogle(String url) throws MalformedURLException, IOException
+	{	
+		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+
+		con.setRequestMethod("GET");
+		con.setRequestProperty("Content-Type", "application/json");
+		
+		int status = con.getResponseCode();
+
+		BufferedReader in = new BufferedReader(
+		  new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer content = new StringBuffer();
+		while ((inputLine = in.readLine()) != null) {
+		    content.append(inputLine);
+		}
+		System.out.println(content);
+		in.close();
+		con.disconnect();
+		
+		return content.toString();
+	}
 	}
 

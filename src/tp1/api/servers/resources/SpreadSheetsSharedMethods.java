@@ -1,6 +1,8 @@
 package tp1.api.servers.resources;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -181,7 +183,6 @@ public class SpreadSheetsSharedMethods {
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 		Spreadsheet sp = spw.getSheet();
-
 		String [][] values;
 		String userId = email.split("@")[0];
 		if(sp.getOwner().equals(userId)||sp.getSharedWith().contains(email)){
@@ -190,22 +191,6 @@ public class SpreadSheetsSharedMethods {
 		}else {
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}	
-	}
-
-	public void importRangeGoogle() throws IOException
-	{
-		HttpURLConnection connection = null;
-		URL url = new URL("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY");
-		
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
-		con.setRequestMethod("GET");
-		con.setRequestProperty("Content-Type", "application/json");
-	}
-	
-	public static URI appendUri(String uri, String appendQuery) throws URISyntaxException {
-	    URI oldUri = new URI(uri);
-	    return new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(),
-	            oldUri.getQuery() == null ? appendQuery : oldUri.getQuery() + "&" + appendQuery, oldUri.getFragment());
 	}
 
 	
