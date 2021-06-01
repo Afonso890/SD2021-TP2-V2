@@ -37,6 +37,7 @@ tp1\api\consts\Consts.class
 tp1\api\dropbox\replies\ListFolderReturn.class
 tp1\api\nfs_cache\SheetsCache.class
 tp1\api\Spreadsheet.class
+tp1\api\SpreadsheetValuesWrapper.class
 tp1\util\EntryClass.class
 tp1\api\dropbox\args\ListFolderArgs.class
 tp1\api\nfs_cache\SheetWrapperClient.class
@@ -68,4 +69,5 @@ tp1\api\replication\sync\SyncPoint.class
 tp1\util\Pair.class
 tp1\api\replication\RecordProcessor.class
 tp1\api\service\soap\SoapSpreadsheets.class
+tp1\api\SpreadsheetWrapper.class
 tp1\api\dropbox\args\AccessFileV2Args.class

@@ -1,7 +1,15 @@
 package tp1.api.servers.resources;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashSet;
 
+import org.codehaus.httpcache4j.uri.URIBuilder;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Client;
@@ -26,6 +34,7 @@ public class SpreadSheetsSharedMethods {
 	private Client client;
 	private int ids;
 	private String uri;
+	private String apiKey ="AIzaSyBlavaHw1h9Th_RouiUa70iMWAhB18oizk";
 
 	public SpreadSheetsSharedMethods(String domainName, Discovery martian, String uri, StorageInterface spreadSheets) {
 		this.domainName=domainName;
@@ -173,15 +182,30 @@ public class SpreadSheetsSharedMethods {
 		}
 		Spreadsheet sp = spw.getSheet();
 
-		//CellRange r = new CellRange( range );
 		String [][] values;
 		String userId = email.split("@")[0];
 		if(sp.getOwner().equals(userId)||sp.getSharedWith().contains(email)){
 			values=SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(GetAbstractSpreadSheet.getTheOne(sp,domainName,client));
-			return new  SpreadsheetValuesWrapper(values,spw.getTw_server()); // Pair<Long, String[][]>(spw.getTw_server(),values);
+			return new  SpreadsheetValuesWrapper(values,spw.getTw_server());
 		}else {
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}	
+	}
+
+	public void importRangeGoogle() throws IOException
+	{
+		HttpURLConnection connection = null;
+		URL url = new URL("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY");
+		
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+		con.setRequestProperty("Content-Type", "application/json");
+	}
+	
+	public static URI appendUri(String uri, String appendQuery) throws URISyntaxException {
+	    URI oldUri = new URI(uri);
+	    return new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(),
+	            oldUri.getQuery() == null ? appendQuery : oldUri.getQuery() + "&" + appendQuery, oldUri.getFragment());
 	}
 
 	

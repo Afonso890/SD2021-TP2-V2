@@ -57,6 +57,8 @@ C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\impl\engine\SpreadsheetEngineImpl.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\spreadsheet\clients\DeleteSpreadSheetClient.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\dropbox\args\ListFolderContinueArgs.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\replication\RecordProcessor.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\SpreadsheetValuesWrapper.java
+C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\SpreadsheetWrapper.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\service\soap\SheetsException.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\spreadsheet\clients\ImportRange.java
 C:\WORK\SD\sd2021-tp1-api_updated\src\tp1\api\engine\AbstractSpreadsheet.java
