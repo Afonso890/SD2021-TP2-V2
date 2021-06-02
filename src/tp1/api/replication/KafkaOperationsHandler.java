@@ -59,8 +59,9 @@ public class KafkaOperationsHandler {
 		return versionNumber;
 	}
 	private ReplicationSyncReturn saveOperation(String value,SpreadSheetResource resource){
-		ReceiveOperationArgs args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
-		ReplicationSyncReturn result=new ReplicationSyncReturn();
+		ReceiveOperationArgs args =    Consts.json.fromJson(value,ReceiveOperationArgs.class);
+        ReplicationSyncReturn result=  new ReplicationSyncReturn();
+        value=args.getArgs();
 		try {
 			if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 				CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
