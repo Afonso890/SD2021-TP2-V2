@@ -11,8 +11,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 
-import org.codehaus.httpcache4j.uri.URIBuilder;
-
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.Response.Status;

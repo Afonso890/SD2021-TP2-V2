@@ -1,22 +1,29 @@
 package tp1.api.replication;
 
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 import tp1.api.Spreadsheet;
 import tp1.api.SpreadsheetValuesWrapper;
 import tp1.api.consts.Consts;
 import tp1.api.replication.args.CreateSpreadSheet;
+import tp1.api.replication.args.DeletSpreadsheet;
+import tp1.api.replication.args.DeleteUsersSheets;
+import tp1.api.replication.args.Share;
+import tp1.api.replication.args.Unshare;
+import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetResource;
 import tp1.api.service.rest.RestSpreadsheets;
-import tp1.util.Pair;
 
 public class ReplicatedSheetsResources implements RestSpreadsheets {
 
 	private KafkaOperationsHandler operations;
 	private SyncPoint sync;
+	private SpreadSheetResource resource;
 	public ReplicatedSheetsResources(SpreadSheetResource resource, SyncPoint sync) {
 		operations=new KafkaOperationsHandler(resource.getDomain(),resource,sync);
 		this.sync=sync;
+		this.resource=resource;
 	}
 
 	@Override
@@ -25,60 +32,75 @@ public class ReplicatedSheetsResources implements RestSpreadsheets {
 		operations.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(create));
 		String result = sync.waitForResult(operations.getVersionNumber());
 		
-		Pair<jakarta.ws.rs.core.Response.Status,String> res=Consts.json.fromJson(result,Pair.class);
-		result= res.getValue2();
-		if(result==null) {
-			throw new WebApplicationException(res.getValue1());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+	
+		if(res.getStatus()==Status.OK) {
+			return res.getObjResponse();
 		}
-		return result;
+		throw new WebApplicationException(res.getStatus());
 	}
 
 	@Override
 	public void deleteSpreadsheet(String sheetId, String password) {
-		// TODO Auto-generated method stub
-		
+		DeletSpreadsheet delete = new DeletSpreadsheet(password, sheetId);
+		operations.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(delete));
+		String result = sync.waitForResult(operations.getVersionNumber());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		throw new WebApplicationException(res.getStatus());
 	}
 
 	@Override
 	public void deleteSpreadsheet(String userId) {
-		// TODO Auto-generated method stub
-		
+		DeleteUsersSheets delete = new DeleteUsersSheets(userId);
+		operations.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(delete));
+		String result = sync.waitForResult(operations.getVersionNumber());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		throw new WebApplicationException(res.getStatus());		
 	}
 
 	@Override
 	public Spreadsheet getSpreadsheet(String sheetId, String userId, String password) {
 		// TODO Auto-generated method stub
-		return null;
+		return resource.getSpreadsheet(sheetId, userId, password);
 	}
 
 	@Override
 	public String[][] getSpreadsheetValues(String sheetId, String userId, String password) {
 		// TODO Auto-generated method stub
-		return null;
+		return resource.getSpreadsheetValues(sheetId, userId, password);
 	}
 
 	@Override
 	public SpreadsheetValuesWrapper importRange(String sheetId, String range, String email) {
 		// TODO Auto-generated method stub
-		return null;
+		return resource.importRange(sheetId, range, email);
 	}
 
 	@Override
 	public void updateCell(String sheetId, String cell, String rawValue, String userId, String password) {
-		// TODO Auto-generated method stub
-		
+		Update update = new Update(sheetId, cell, rawValue, userId, password);
+		operations.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(update));
+		String result = sync.waitForResult(operations.getVersionNumber());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		throw new WebApplicationException(res.getStatus());		
 	}
 
 	@Override
 	public void shareSpreadsheet(String sheetId, String userId, String password) {
-		// TODO Auto-generated method stub
-		
+		Share share = new Share(sheetId, userId, password);
+		operations.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(share));
+		String result = sync.waitForResult(operations.getVersionNumber());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		throw new WebApplicationException(res.getStatus());
 	}
 
 	@Override
 	public void unshareSpreadsheet(String sheetId, String userId, String password) {
-		// TODO Auto-generated method stub
-		
+		Unshare unshare = new Unshare(sheetId, userId, password);
+		operations.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(unshare));
+		String result = sync.waitForResult(operations.getVersionNumber());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		throw new WebApplicationException(res.getStatus());
 	}
 	
 }

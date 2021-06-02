@@ -2,6 +2,8 @@ package tp1.api.replication.sync;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -15,11 +17,14 @@ public class SyncPoint
 	}
 
 	private Map<Long,String> result;
+	private Map<Long,String> writeOperationsPerfomed;
 	private long version;
 	
 	
 	private SyncPoint() {
 		result = new HashMap<Long,String>();
+		writeOperationsPerfomed=new HashMap<Long,String>();
+		version=0;
 	}
 	
 	/**
@@ -68,6 +73,18 @@ public class SyncPoint
 			if( it.next().getKey() < n)
 				it.remove();
 		}
+	}
+	/**
+	 * records all the registered operations
+	 * @param ver - version number
+	 * @param ReceiveOperationArgsString
+	 */
+	public synchronized void addOperations(long ver, String ReceiveOperationArgsString) {
+		writeOperationsPerfomed.put(ver, ReceiveOperationArgsString);
+	}
+	
+	public Iterator<Entry<Long,String>> operations(){
+		return writeOperationsPerfomed.entrySet().iterator();
 	}
 
 }
