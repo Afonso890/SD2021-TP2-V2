@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.xml.ws.soap.AddressingFeature.Responses;
 import tp1.api.consts.Consts;
 import tp1.api.replication.args.CreateSpreadSheet;
 import tp1.api.replication.args.DeletSpreadsheet;
@@ -48,17 +50,17 @@ public class KafkaOperationsHandler {
 	}
 	private void saveOperation(String value,SpreadSheetResource resource){
 		ReceiveOperationArgs args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
-		String result="";
+		ReplicationSyncReturn result=new ReplicationSyncReturn();
 		Pair<jakarta.ws.rs.core.Response.Status,String> res=new Pair<jakarta.ws.rs.core.Response.Status,String>();
 
 		if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 			CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
 			try {
-				result = resource.createSpreadsheet(cs.getSheet(),cs.getPassword());
-				res.setValue1(jakarta.ws.rs.core.Response.Status.OK);
-				res.setValue2(result);
+				result.setObjResponse(resource.createSpreadsheet(cs.getSheet(),cs.getPassword()));
+				result.setStatus(Status.OK);
+				
 			}catch(WebApplicationException e) {
-				result=e.getResponse().getStatus()+"";
+				result.setStatus(e.getResponse().getStatusInfo().toEnum());
 			}			
 		}else if(ReceiveOperationArgs.DELETE_SPREADSHEET.equals(args.getOperation())) {
 			DeletSpreadsheet cs = Consts.json.fromJson(value,DeletSpreadsheet.class);
