@@ -29,6 +29,7 @@ public class KafkaOperationsHandler {
 		this.sync=sync;
 		this.topic=topic;
 		this.versionNumber=updateReplicaOnStarting(resource);
+		System.out.println("REPLICA STARDED ------------------------------: "+topic);
 		receiver(resource);
 	}
 	
@@ -50,7 +51,7 @@ public class KafkaOperationsHandler {
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
 				System.out.println( "Sequence Number: " + r.topic() + 
-						" , " +  r.offset() + " -> " + r.value());
+						" , " +  r.offset() + " -> ");
 				sync.setResult(versionNumber, Consts.json.toJson(saveOperation(r.value(),resource)));
 			}
 		});
@@ -61,11 +62,13 @@ public class KafkaOperationsHandler {
 	private ReplicationSyncReturn saveOperation(String value,SpreadSheetResource resource){
 		ReceiveOperationArgs args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
 		ReplicationSyncReturn result=new ReplicationSyncReturn();
+		value=args.getArgs();
+		System.out.println("GOING TO PRINT ARRRRRRRRRRRRRRRRRRRGGGGGGGGGGGGGGGGGGGGGGGSSSSS -----: ");
+		System.out.println(value);
 		try {
 			if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 				CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
 				result.setObjResponse(resource.createSpreadsheet(cs.getSheet(),cs.getPassword()));
-				result.setStatus(Status.OK);		
 			}else if(ReceiveOperationArgs.DELETE_SPREADSHEET.equals(args.getOperation())) {
 				DeletSpreadsheet cs = Consts.json.fromJson(value,DeletSpreadsheet.class);
 				resource.deleteSpreadsheet(cs.getSheetid(),cs.getPassword());
@@ -82,6 +85,7 @@ public class KafkaOperationsHandler {
 				Update cs = Consts.json.fromJson(value,Update.class);
 				resource.updateCell(cs.getSheetId(), cs.getCell(),cs.getRawValue(), cs.getUserId(), cs.getPassword());
 			}
+			result.setStatus(Status.OK);
 		}catch(WebApplicationException e) {
 			result.setStatus(e.getResponse().getStatusInfo().toEnum());
 		}

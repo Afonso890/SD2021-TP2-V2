@@ -1,6 +1,7 @@
 package tp1.api.server.rest;
 
 import java.net.InetAddress;
+
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -16,7 +17,6 @@ import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetResource;
 import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.storage.MemoryStorage;
-import tp1.api.storage.StorageInterface;
 import tp1.util.InsecureHostnameVerifier;
 
 
