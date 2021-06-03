@@ -1,29 +1,35 @@
 package tp1.api.replication.sync;
 
 import java.util.HashMap;
+
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class SyncPoint
 {
 	private static SyncPoint instance;
+
 	public static SyncPoint getInstance() {
-		if( instance == null)
+		if( instance == null) {
 			instance = new SyncPoint();
+		}
+		
 		return instance;
 	}
 
 	private Map<Long,String> result;
-	private Map<Long,String> writeOperationsPerfomed;
+	private LinkedList<String> writeOperationsPerfomed;
 	private long version;
 	
 	
 	private SyncPoint() {
 		result = new HashMap<Long,String>();
-		writeOperationsPerfomed=new HashMap<Long,String>();
+		writeOperationsPerfomed=new LinkedList<String>();
 		version=0;
 	}
+	
 	
 	/**
 	 * Waits for version to be at least equals to n
@@ -77,12 +83,19 @@ public class SyncPoint
 	 * @param ver - version number
 	 * @param ReceiveOperationArgsString
 	 */
-	public synchronized void addOperations(long ver, String ReceiveOperationArgsString) {
-		writeOperationsPerfomed.put(ver, ReceiveOperationArgsString);
+	public synchronized int addOperations(String ReceiveOperationArgsString) {
+		writeOperationsPerfomed.add(ReceiveOperationArgsString);
+		return writeOperationsPerfomed.size();
+	}
+	public int totalOperations() {
+		return writeOperationsPerfomed.size();
 	}
 	
-	public Iterator<Entry<Long,String>> operations(){
-		return writeOperationsPerfomed.entrySet().iterator();
+	public LinkedList<String> operations(){
+		return writeOperationsPerfomed;
+	}
+	public void setOperations(LinkedList<String> ops) {
+		writeOperationsPerfomed=ops;
 	}
 
 }

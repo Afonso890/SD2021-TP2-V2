@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -20,39 +19,73 @@ import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetResource;
 public class KafkaOperationsHandler {
+	
+	private static final String HELP="HELP";
 
 	private String topic;
+	private String topic2;
 	private SyncPoint sync;
 	private long versionNumber;
+	KafkaPublisher publisher;
 	public KafkaOperationsHandler(String topic,SpreadSheetResource resource, SyncPoint sync) {
 		// TODO Auto-generated constructor stub
+		publisher = KafkaPublisher.createPublisher("localhost:9092, kafka:9092");
+
 		this.sync=sync;
 		this.topic=topic;
-		this.versionNumber=updateReplicaOnStarting(resource);
-		System.out.println("REPLICA STARDED ------------------------------: "+topic);
+		topic2=topic+"_STARTED";
+		versionNumber=0;
 		receiver(resource);
+		letOthersKnowIamRunning();
 	}
 	
-	private long updateReplicaOnStarting(SpreadSheetResource resource) {
-		Iterator<Entry<Long,String>> operations = sync.operations();
+	private long updateReplicaOnStarting(SpreadSheetResource resource, String ops) {
 		long version=0;
-		while(operations.hasNext()) {
-			saveOperation(operations.next().getValue(),resource);
-			version++;
+		synchronized (resource) {
+			@SuppressWarnings("unchecked")
+			LinkedList<String> operations=Consts.json.fromJson(ops,LinkedList.class);
+			sync.setOperations(operations);
+			Iterator<String> it = operations.iterator(); 
+			while(it.hasNext()) {
+				saveOperation(it.next(),resource);
+				version++;
+			}
 		}
+		System.out.println("********************************************************* OPERATIONS INSERTED "+version);
 		return version;
 	}
 
 	private void receiver(SpreadSheetResource resource) {
 		List<String> topicLst = new LinkedList<String>();
 		topicLst.add(topic);
+		topicLst.add(topic2);
+
 		KafkaSubscriber subscriber = KafkaSubscriber.createSubscriber("localhost:9092, kafka:9092", topicLst);
 		subscriber.start( new RecordProcessor() {
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
-				System.out.println( "Sequence Number: " + r.topic() + 
-						" , " +  r.offset() + " -> ");
-				sync.setResult(versionNumber, Consts.json.toJson(saveOperation(r.value(),resource)));
+				//System.out.println( "Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
+				if(topic.equals(r.topic())) {
+					sync.setResult(versionNumber, Consts.json.toJson(saveOperation(r.value(),resource)));
+				}else if(topic2.equals(r.topic())) {
+					System.out.println();
+					System.out.println(" RECEIVED EVENTS : ");
+					System.out.println();
+					if(HELP.equals(r.value())) {
+						System.out.println(sync.totalOperations()+" ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt");
+						if(sync.totalOperations()>Consts.ZERO) {
+							letOthersKnowIamRunning();
+						}
+					}
+					else {
+						System.out.println("RECEIVED SOMETHING ELSE 0000000000000000000000000000000000000000000000000000000000000000000000000 TOTAL OPERATIONS "+sync.totalOperations());
+						if(sync.totalOperations()==Consts.ZERO) {
+							System.out.println("44444444444444444444444444444444444444444444444444444444444444444444 going to update!");
+							versionNumber = updateReplicaOnStarting(resource,r.value());
+						}
+					}
+				}
+				
 			}
 		});
 	}
@@ -63,8 +96,6 @@ public class KafkaOperationsHandler {
 		ReceiveOperationArgs args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
 		ReplicationSyncReturn result=new ReplicationSyncReturn();
 		value=args.getArgs();
-		System.out.println("GOING TO PRINT ARRRRRRRRRRRRRRRRRRRGGGGGGGGGGGGGGGGGGGGGGGSSSSS -----: ");
-		System.out.println(value);
 		try {
 			if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 				CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
@@ -93,12 +124,27 @@ public class KafkaOperationsHandler {
 	}
 	public void sender(String operation, String value) {
 		versionNumber++;
-		KafkaPublisher publisher = KafkaPublisher.createPublisher("localhost:9092, kafka:9092");
 		value = Consts.json.toJson(new ReceiveOperationArgs(operation, value));
 		long sequenceNumber = publisher.publish(topic,value);
+		sync.addOperations(value);
 		if(sequenceNumber >= 0) {
-			System.out.println("Message published with sequence number: " + sequenceNumber);
-			sync.addOperations(versionNumber,value);
+			System.out.println("Message published with sequence number: " + sequenceNumber+" TOTAL NUMBER OF OPERATIONS "+sync.totalOperations());
+		}else {
+			System.out.println("Failed to publish message");
+		}
+	}
+	public void letOthersKnowIamRunning() {
+		String value=HELP;
+		LinkedList<String> ops=sync.operations();
+		if(ops.size()>0) {
+			value=Consts.json.toJson(ops);
+		}
+		long sequenceNumber = publisher.publish(topic2,value);
+		if(sequenceNumber >= 0) {
+			System.out.println();
+			System.out.println("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]] WARN SENT: " + sequenceNumber);
+			System.out.println();
+
 		}else {
 			System.out.println("Failed to publish message");
 		}
