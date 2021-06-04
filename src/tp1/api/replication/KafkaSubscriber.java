@@ -17,8 +17,8 @@ public class KafkaSubscriber {
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, addr);
 
 		// Configura o modo de subscrição (ver documentação em kafka.apache.org)
-		//props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		//props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, "grp" + System.nanoTime());
 
