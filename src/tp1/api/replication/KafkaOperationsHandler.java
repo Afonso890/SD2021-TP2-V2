@@ -37,6 +37,7 @@ public class KafkaOperationsHandler {
 		this.topic=topic;
 		versionNumber=0;
 		receiver(resource);
+		System.out.println("+++++++++++++++++++++++ STARTED REPLICA *********************** ");
 	}
 	
 
@@ -63,7 +64,7 @@ public class KafkaOperationsHandler {
 			public void onReceive(ConsumerRecord<String, String> r) {
 				//System.out.println( "Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
 				ReplicationSyncReturn res=saveOperation(r.value(),resource);
-				sync.setResult(versionNumber, Consts.json.toJson(res));
+				sync.setResult(versionNumber,Consts.json.toJson(res));
 			}
 		});
 	}
@@ -72,14 +73,9 @@ public class KafkaOperationsHandler {
 	}
 	private ReplicationSyncReturn saveOperation(String value,RestSpreadsheets resource){
 		ReceiveOperationArgs args;
-		try {
-			args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
-			value=args.getArgs();
-		}catch(Exception e) {
-			return null;
-		}
+		args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
+		value=args.getArgs();
 		ReplicationSyncReturn result=new ReplicationSyncReturn();
-
 		try {
 			if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 				CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
