@@ -1,6 +1,7 @@
 package tp1.api.replication.sync;
 
 import java.util.HashMap;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,9 +9,12 @@ import java.util.Map.Entry;
 public class SyncPoint
 {
 	private static SyncPoint instance;
-	public static SyncPoint getInstance() {
-		if( instance == null)
+
+	public synchronized static SyncPoint getInstance() {
+		if( instance == null) {
 			instance = new SyncPoint();
+		}
+		
 		return instance;
 	}
 
@@ -21,14 +25,15 @@ public class SyncPoint
 	
 	private SyncPoint() {
 		result = new HashMap<Long,String>();
-		writeOperationsPerfomed=new HashMap<Long,String>();
 		version=0;
 	}
+	
 	
 	/**
 	 * Waits for version to be at least equals to n
 	 */
 	public synchronized void waitForVersion( long n) {
+		n=n+1;
 		while( version < n) {
 			try {
 				wait();
@@ -42,6 +47,7 @@ public class SyncPoint
 	 * Assuming that results are added sequentially, returns null if the result is not available.
 	 */
 	public synchronized String waitForResult( long n) {
+		n=n+1;
 		while( version < n) {
 			try {
 				wait();
@@ -83,11 +89,6 @@ public class SyncPoint
 	
 	public Iterator<Entry<Long,String>> operations(){
 		return writeOperationsPerfomed.entrySet().iterator();
-	}
-	
-	public Map<Long,String> getWriteOperations()
-	{
-		return this.writeOperationsPerfomed;
 	}
 
 }

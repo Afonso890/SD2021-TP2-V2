@@ -1,8 +1,8 @@
 package tp1.api.replication;
 
 import jakarta.ws.rs.WebApplicationException;
+
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.xml.ws.soap.AddressingFeature.Responses;
 import tp1.api.Spreadsheet;
 import tp1.api.SpreadsheetValuesWrapper;
 import tp1.api.consts.Consts;

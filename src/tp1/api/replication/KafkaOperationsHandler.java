@@ -1,7 +1,6 @@
 package tp1.api.replication;
 
 import java.util.Iterator;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -20,22 +19,24 @@ import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetResource;
 public class KafkaOperationsHandler {
+	
 
 	private String topic;
 	private SyncPoint sync;
 	private long versionNumber;
+	KafkaPublisher publisher;
 	public KafkaOperationsHandler(String topic,SpreadSheetResource resource, SyncPoint sync) {
+		publisher = KafkaPublisher.createPublisher("localhost:9092, kafka:9092");
 		this.sync=sync;
 		this.topic=topic;
-		this.versionNumber=updateReplicaOnStarting(resource);
-		System.out.println("REPLICA STARDED ------------------------------: "+topic);
+		versionNumber=0;
 		receiver(resource);
 	}
 	
+
 	private long updateReplicaOnStarting(SpreadSheetResource resource) {
 		Iterator<Entry<Long,String>> operations = sync.operations();
 		long version=0;
-		System.out.println("TAMANHO DE WRITE OPERATIOONS NO SENDER XXXXXXXXXXXXXXXXXXXXXX " + sync.getWriteOperations().size());
 		while(operations.hasNext()) {
 			System.out.println("CADA CICLO DAS OPERATIONS NO SYNC "+version);
 			saveOperation(operations.next().getValue(),resource);
@@ -52,9 +53,11 @@ public class KafkaOperationsHandler {
 		subscriber.start( new RecordProcessor() {
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
-				System.out.println( "Sequence Number: " + r.topic() + 
-						" , " +  r.offset() + " -> ");
-				sync.setResult(versionNumber, Consts.json.toJson(saveOperation(r.value(),resource)));
+				//System.out.println( "Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
+				ReplicationSyncReturn res=saveOperation(r.value(),resource);
+				if(res!=null) {
+					sync.setResult(versionNumber, Consts.json.toJson(res));
+				}
 			}
 		});
 	}
@@ -62,11 +65,15 @@ public class KafkaOperationsHandler {
 		return versionNumber;
 	}
 	private ReplicationSyncReturn saveOperation(String value,SpreadSheetResource resource){
-		ReceiveOperationArgs args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
+		ReceiveOperationArgs args;
+		try {
+			args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
+			value=args.getArgs();
+		}catch(Exception e) {
+			return null;
+		}
 		ReplicationSyncReturn result=new ReplicationSyncReturn();
-		value=args.getArgs();
-		System.out.println("GOING TO PRINT ARRRRRRRRRRRRRRRRRRRGGGGGGGGGGGGGGGGGGGGGGGSSSSS -----: ");
-		System.out.println(value);
+
 		try {
 			if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 				CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
@@ -88,21 +95,20 @@ public class KafkaOperationsHandler {
 				resource.updateCell(cs.getSheetId(), cs.getCell(),cs.getRawValue(), cs.getUserId(), cs.getPassword());
 			}
 			result.setStatus(Status.OK);
+			versionNumber++;
 		}catch(WebApplicationException e) {
 			result.setStatus(e.getResponse().getStatusInfo().toEnum());
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
 		return result;
 	}
 	public void sender(String operation, String value) {
-		versionNumber++;
-		KafkaPublisher publisher = KafkaPublisher.createPublisher("localhost:9092, kafka:9092");
-		value = Consts.json.toJson(new ReceiveOperationArgs(operation, value));
+		value = Consts.json.toJson(new ReceiveOperationArgs(operation,value));
 		long sequenceNumber = publisher.publish(topic,value);
 		if(sequenceNumber >= 0) {
 			System.out.println("Message published with sequence number: " + sequenceNumber);
 			sync.addOperations(versionNumber,value);
-			System.out.println("TAMANHO DE WRITE OPERATIOONS NO SENDER XXXXXXXXXXXXXXXXXXXXXX " + sync.getWriteOperations().size());
-
 		}else {
 			System.out.println("Failed to publish message");
 		}
