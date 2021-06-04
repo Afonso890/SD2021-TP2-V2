@@ -3,7 +3,6 @@ package tp1.api.replication.sync;
 import java.util.HashMap;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -20,13 +19,11 @@ public class SyncPoint
 	}
 
 	private Map<Long,String> result;
-	private LinkedList<String> writeOperationsPerfomed;
 	private long version;
 	
 	
 	private SyncPoint() {
 		result = new HashMap<Long,String>();
-		writeOperationsPerfomed=new LinkedList<String>();
 		version=0;
 	}
 	
@@ -35,6 +32,7 @@ public class SyncPoint
 	 * Waits for version to be at least equals to n
 	 */
 	public synchronized void waitForVersion( long n) {
+		n=n+1;
 		while( version < n) {
 			try {
 				wait();
@@ -48,6 +46,7 @@ public class SyncPoint
 	 * Assuming that results are added sequentially, returns null if the result is not available.
 	 */
 	public synchronized String waitForResult( long n) {
+		n=n+1;
 		while( version < n) {
 			try {
 				wait();
@@ -78,24 +77,4 @@ public class SyncPoint
 				it.remove();
 		}
 	}
-	/**
-	 * records all the registered operations
-	 * @param ver - version number
-	 * @param ReceiveOperationArgsString
-	 */
-	public synchronized int addOperations(String ReceiveOperationArgsString) {
-		writeOperationsPerfomed.add(ReceiveOperationArgsString);
-		return writeOperationsPerfomed.size();
-	}
-	public int totalOperations() {
-		return writeOperationsPerfomed.size();
-	}
-	
-	public LinkedList<String> operations(){
-		return writeOperationsPerfomed;
-	}
-	public void setOperations(LinkedList<String> ops) {
-		writeOperationsPerfomed=ops;
-	}
-
 }
