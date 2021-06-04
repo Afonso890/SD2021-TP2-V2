@@ -25,20 +25,23 @@ public class KafkaOperationsHandler {
 	private SyncPoint sync;
 	private long versionNumber;
 	public KafkaOperationsHandler(String topic,SpreadSheetResource resource, SyncPoint sync) {
-		// TODO Auto-generated constructor stub
 		this.sync=sync;
 		this.topic=topic;
 		this.versionNumber=updateReplicaOnStarting(resource);
+		System.out.println("REPLICA STARDED ------------------------------: "+topic);
 		receiver(resource);
 	}
 	
 	private long updateReplicaOnStarting(SpreadSheetResource resource) {
 		Iterator<Entry<Long,String>> operations = sync.operations();
 		long version=0;
+		System.out.println("TAMANHO DE WRITE OPERATIOONS NO SENDER XXXXXXXXXXXXXXXXXXXXXX " + sync.getWriteOperations().size());
 		while(operations.hasNext()) {
+			System.out.println("CADA CICLO DAS OPERATIONS NO SYNC "+version);
 			saveOperation(operations.next().getValue(),resource);
 			version++;
 		}
+		System.out.println("CHEGOU AO FIM DO UPDATE ");
 		return version;
 	}
 
@@ -50,7 +53,7 @@ public class KafkaOperationsHandler {
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
 				System.out.println( "Sequence Number: " + r.topic() + 
-						" , " +  r.offset() + " -> " + r.value());
+						" , " +  r.offset() + " -> ");
 				sync.setResult(versionNumber, Consts.json.toJson(saveOperation(r.value(),resource)));
 			}
 		});
@@ -59,14 +62,15 @@ public class KafkaOperationsHandler {
 		return versionNumber;
 	}
 	private ReplicationSyncReturn saveOperation(String value,SpreadSheetResource resource){
-		ReceiveOperationArgs args =    Consts.json.fromJson(value,ReceiveOperationArgs.class);
-        ReplicationSyncReturn result=  new ReplicationSyncReturn();
-        value=args.getArgs();
+		ReceiveOperationArgs args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
+		ReplicationSyncReturn result=new ReplicationSyncReturn();
+		value=args.getArgs();
+		System.out.println("GOING TO PRINT ARRRRRRRRRRRRRRRRRRRGGGGGGGGGGGGGGGGGGGGGGGSSSSS -----: ");
+		System.out.println(value);
 		try {
 			if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 				CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
 				result.setObjResponse(resource.createSpreadsheet(cs.getSheet(),cs.getPassword()));
-				result.setStatus(Status.OK);		
 			}else if(ReceiveOperationArgs.DELETE_SPREADSHEET.equals(args.getOperation())) {
 				DeletSpreadsheet cs = Consts.json.fromJson(value,DeletSpreadsheet.class);
 				resource.deleteSpreadsheet(cs.getSheetid(),cs.getPassword());
@@ -83,6 +87,7 @@ public class KafkaOperationsHandler {
 				Update cs = Consts.json.fromJson(value,Update.class);
 				resource.updateCell(cs.getSheetId(), cs.getCell(),cs.getRawValue(), cs.getUserId(), cs.getPassword());
 			}
+			result.setStatus(Status.OK);
 		}catch(WebApplicationException e) {
 			result.setStatus(e.getResponse().getStatusInfo().toEnum());
 		}
@@ -96,6 +101,8 @@ public class KafkaOperationsHandler {
 		if(sequenceNumber >= 0) {
 			System.out.println("Message published with sequence number: " + sequenceNumber);
 			sync.addOperations(versionNumber,value);
+			System.out.println("TAMANHO DE WRITE OPERATIOONS NO SENDER XXXXXXXXXXXXXXXXXXXXXX " + sync.getWriteOperations().size());
+
 		}else {
 			System.out.println("Failed to publish message");
 		}
