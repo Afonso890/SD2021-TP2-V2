@@ -3,8 +3,6 @@ package tp1.api.replication;
 import java.util.LinkedList;
 
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -22,23 +20,24 @@ import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 public class KafkaOperationsHandler {
 	
 
+	private final String KAFKA_HOSTS="localhost:9092, kafka:9092";
+
 	private String topic;
 	private SyncPoint sync;
 	private long versionNumber;
 	KafkaPublisher publisher;
 	private long opsSent;
-	private Queue<String> missedOperations;
+	//private Queue<String> missedOperations;
 	public KafkaOperationsHandler(String topic,SpreadSheetsSharedMethods resource, SyncPoint sync) {
 		// TODO Auto-generated constructor stub
-		publisher = KafkaPublisher.createPublisher("localhost:9092, kafka:9092");
-		missedOperations=new ConcurrentLinkedQueue<String>(); //nk LinkedList<String>();
+		publisher = KafkaPublisher.createPublisher(KAFKA_HOSTS);
+		//missedOperations=new ConcurrentLinkedQueue<String>(); //nk LinkedList<String>();
 		opsSent=-1L;
 		this.sync=sync;
 		this.topic=topic;
 		versionNumber=-1L;
 		receiver(resource);
-		updateReplica(resource);
-		System.out.println("+++++++++++++++++++++++ STARTED REPLICA *********************** ");
+		//updateReplica(resource);
 	}
 	
 	private void receiver(SpreadSheetsSharedMethods resource) {
@@ -51,19 +50,14 @@ public class KafkaOperationsHandler {
 			public void onReceive(ConsumerRecord<String, String> r) {
 				System.out.println("Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
 				versionNumber=r.offset();
-				if(missedOperations!=null) {
-					missedOperations.add(r.value());
-					sync.setVersionNumber(versionNumber);
-				}else {
-					ReplicationSyncReturn res=saveOperation(r.value(),resource);
-					sync.setResult(versionNumber,Consts.json.toJson(res));
-				}
+				ReplicationSyncReturn res=saveOperation(r.value(),resource);
+				sync.setResult(versionNumber,Consts.json.toJson(res));
 			}
 		});
 	}
+	/*
 	private synchronized void  updateReplica(SpreadSheetsSharedMethods resource) {
 		try {
-			//System.out.println("GOING TO SLEEP BEFORE UPDATING HAHHAHAHAHAHAA");
 			Thread.sleep(1000);
 			System.out.println("GOING TO UPDATE OLD OPERATIONS -----> LENGTH "+missedOperations.size());
 			while(missedOperations.size()>0) {
@@ -77,11 +71,11 @@ public class KafkaOperationsHandler {
 			e.printStackTrace();
 		}
 		missedOperations=null;
-	}
+	}*/
 	public long getVersionNumber() {
 		return versionNumber;
 	}
-	public long operationNumberSentByThisReplica() {
+	public long sentOperationsCounter() {
 		return opsSent;
 	}
 	private ReplicationSyncReturn saveOperation(String value,SpreadSheetsSharedMethods resource){
@@ -110,10 +104,8 @@ public class KafkaOperationsHandler {
 				resource.updateCell(cs.getSheetId(), cs.getCell(),cs.getRawValue(), cs.getUserId(), cs.getPassword());
 			}
 			result.setStatus(Status.OK);
-			System.out.println("MESSAGE RECEIVED <-----------------------> "+versionNumber+" --> OPERATIONS SENT "+opsSent);
 		}catch(WebApplicationException e) {
 			result.setStatus(e.getResponse().getStatusInfo().toEnum());
-			System.out.println("FAILED FAILED STATUS "+result.getStatus()+" OPERATION ------------------> "+args.getOperation());
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
