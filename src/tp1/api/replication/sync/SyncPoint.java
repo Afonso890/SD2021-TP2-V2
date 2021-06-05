@@ -25,7 +25,7 @@ public class SyncPoint
 	
 	private SyncPoint() {
 		result = new HashMap<Long,String>();
-		version=0;
+		version=-1L;
 	}
 	
 	
