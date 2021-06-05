@@ -1,10 +1,8 @@
 package tp1.api.replication;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -20,8 +18,6 @@ import tp1.api.replication.args.Share;
 import tp1.api.replication.args.Unshare;
 import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
-import tp1.api.servers.resources.SpreadSheetResource;
-import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 public class KafkaOperationsHandler {
 	
@@ -30,7 +26,6 @@ public class KafkaOperationsHandler {
 	private SyncPoint sync;
 	private long versionNumber;
 	KafkaPublisher publisher;
-
 	private long opsSent;
 	private Queue<String> missedOperations;
 	public KafkaOperationsHandler(String topic,SpreadSheetsSharedMethods resource, SyncPoint sync) {
@@ -46,20 +41,6 @@ public class KafkaOperationsHandler {
 		System.out.println("+++++++++++++++++++++++ STARTED REPLICA *********************** ");
 	}
 	
-
-	private long updateReplicaOnStarting(SpreadSheetsSharedMethods resource) {
-		Iterator<Entry<Long,String>> operations = sync.operations();
-		long version=0;
-		while(operations.hasNext()) {
-			System.out.println("CADA CICLO DAS OPERATIONS NO SYNC "+version);
-			saveOperation(operations.next().getValue(),resource);
-			version++;
-		}
-		System.out.println("CHEGOU AO FIM DO UPDATE ");
-		return version;
-	}
-
-
 	private void receiver(SpreadSheetsSharedMethods resource) {
 		List<String> topicLst = new LinkedList<String>();
 		topicLst.add(topic);
@@ -80,7 +61,6 @@ public class KafkaOperationsHandler {
 			}
 		});
 	}
-	
 	private synchronized void  updateReplica(SpreadSheetsSharedMethods resource) {
 		try {
 			//System.out.println("GOING TO SLEEP BEFORE UPDATING HAHHAHAHAHAHAA");
@@ -144,8 +124,6 @@ public class KafkaOperationsHandler {
 		long sequenceNumber = publisher.publish(topic,value);
 		if(sequenceNumber >= 0) {
 			System.out.println("Message published with sequence number: " + sequenceNumber);
-			sync.addOperations(versionNumber,value);
-			opsSent++;
 			opsSent=sequenceNumber;
 		}else {
 			System.out.println("Failed to publish message");

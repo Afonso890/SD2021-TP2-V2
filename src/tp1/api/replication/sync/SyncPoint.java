@@ -19,7 +19,6 @@ public class SyncPoint
 	}
 
 	private Map<Long,String> result;
-	private Map<Long,String> writeOperationsPerfomed;
 	private long version;
 	
 	
@@ -79,17 +78,4 @@ public class SyncPoint
 				it.remove();
 		}
 	}
-	/**
-	 * records all the registered operations
-	 * @param ver - version number
-	 * @param ReceiveOperationArgsString
-	 */
-	public synchronized void addOperations(long ver, String ReceiveOperationArgsString) {
-		writeOperationsPerfomed.put(ver, ReceiveOperationArgsString);
-	}
-	
-	public Iterator<Entry<Long,String>> operations(){
-		return writeOperationsPerfomed.entrySet().iterator();
-	}
-
 }

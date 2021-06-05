@@ -13,8 +13,6 @@ import tp1.api.replication.args.Share;
 import tp1.api.replication.args.Unshare;
 import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
-import tp1.api.servers.resources.SpreadSheetResource;
-import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 import tp1.api.service.rest.RestSpreadsheetsReplication;
 
@@ -22,7 +20,6 @@ public class ReplicatedSheetsResources implements RestSpreadsheetsReplication {
 
 	private KafkaOperationsHandler operations;
 	private SyncPoint sync;
-
 	private SpreadSheetsSharedMethods resource;
 	public ReplicatedSheetsResources(SpreadSheetsSharedMethods resource, SyncPoint sync,KafkaOperationsHandler operations ) {
 		this.operations=operations;
@@ -30,17 +27,6 @@ public class ReplicatedSheetsResources implements RestSpreadsheetsReplication {
 		this.resource=resource;
 		System.out.println("==================================SERVER REPLICATED STARTED --------------------------------------->");
 	}
-	
-	
-	private long max(Long version) {
-		if(version==null) {
-			return operations.getVersionNumber();
-		}else {
-			return Math.max(operations.getVersionNumber(),version);
-		}
-	}
-	
-
 	@Override
 	public String createSpreadsheet(Long version, Spreadsheet sheet, String password) {
 		CreateSpreadSheet create = new CreateSpreadSheet(sheet, password);
