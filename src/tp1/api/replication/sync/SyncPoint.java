@@ -10,7 +10,7 @@ public class SyncPoint
 {
 	private static SyncPoint instance;
 
-	public synchronized static SyncPoint getInstance() {
+	public static synchronized SyncPoint getInstance() {
 		if( instance == null) {
 			instance = new SyncPoint();
 		}
@@ -33,8 +33,7 @@ public class SyncPoint
 	 * Waits for version to be at least equals to n
 	 */
 	public synchronized void waitForVersion( long n) {
-		n=n+1;
-		while( version < n) {
+		while( version<n) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -42,12 +41,10 @@ public class SyncPoint
 			}
 		}
 	}
-
 	/**
 	 * Assuming that results are added sequentially, returns null if the result is not available.
 	 */
 	public synchronized String waitForResult( long n) {
-		n=n+1;
 		while( version < n) {
 			try {
 				wait();
@@ -66,6 +63,10 @@ public class SyncPoint
 			result.put(n, res);
 		version = n;
 		notifyAll();
+	}
+	
+	public synchronized void setVersionNumber(long number) {
+		version=number;
 	}
 
 	/**

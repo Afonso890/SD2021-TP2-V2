@@ -5,6 +5,8 @@ import java.util.LinkedList;
 
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -20,6 +22,7 @@ import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetResource;
 import tp1.api.service.rest.RestSpreadsheets;
+import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 public class KafkaOperationsHandler {
 	
 
@@ -29,19 +32,22 @@ public class KafkaOperationsHandler {
 	KafkaPublisher publisher;
 
 	private long opsSent;
-	public KafkaOperationsHandler(String topic,RestSpreadsheets resource, SyncPoint sync) {
+	private Queue<String> missedOperations;
+	public KafkaOperationsHandler(String topic,SpreadSheetsSharedMethods resource, SyncPoint sync) {
 		// TODO Auto-generated constructor stub
 		publisher = KafkaPublisher.createPublisher("localhost:9092, kafka:9092");
-		opsSent=0;
+		missedOperations=new ConcurrentLinkedQueue<String>(); //nk LinkedList<String>();
+		opsSent=-1L;
 		this.sync=sync;
 		this.topic=topic;
-		versionNumber=0;
+		versionNumber=-1L;
 		receiver(resource);
+		updateReplica(resource);
 		System.out.println("+++++++++++++++++++++++ STARTED REPLICA *********************** ");
 	}
 	
 
-	private long updateReplicaOnStarting(SpreadSheetResource resource) {
+	private long updateReplicaOnStarting(SpreadSheetsSharedMethods resource) {
 		Iterator<Entry<Long,String>> operations = sync.operations();
 		long version=0;
 		while(operations.hasNext()) {
@@ -54,7 +60,7 @@ public class KafkaOperationsHandler {
 	}
 
 
-	private void receiver(RestSpreadsheets resource) {
+	private void receiver(SpreadSheetsSharedMethods resource) {
 		List<String> topicLst = new LinkedList<String>();
 		topicLst.add(topic);
 		KafkaSubscriber subscriber = KafkaSubscriber.createSubscriber("localhost:9092, kafka:9092", topicLst);
@@ -62,16 +68,43 @@ public class KafkaOperationsHandler {
 		subscriber.start( new RecordProcessor() {
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
-				//System.out.println( "Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
-				ReplicationSyncReturn res=saveOperation(r.value(),resource);
-				sync.setResult(versionNumber,Consts.json.toJson(res));
+				System.out.println("Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
+				versionNumber=r.offset();
+				if(missedOperations!=null) {
+					missedOperations.add(r.value());
+					sync.setVersionNumber(versionNumber);
+				}else {
+					ReplicationSyncReturn res=saveOperation(r.value(),resource);
+					sync.setResult(versionNumber,Consts.json.toJson(res));
+				}
 			}
 		});
+	}
+	
+	private synchronized void  updateReplica(SpreadSheetsSharedMethods resource) {
+		try {
+			//System.out.println("GOING TO SLEEP BEFORE UPDATING HAHHAHAHAHAHAA");
+			Thread.sleep(1000);
+			System.out.println("GOING TO UPDATE OLD OPERATIONS -----> LENGTH "+missedOperations.size());
+			while(missedOperations.size()>0) {
+				try {
+					saveOperation(missedOperations.poll(),resource);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		missedOperations=null;
 	}
 	public long getVersionNumber() {
 		return versionNumber;
 	}
-	private ReplicationSyncReturn saveOperation(String value,RestSpreadsheets resource){
+	public long operationNumberSentByThisReplica() {
+		return opsSent;
+	}
+	private ReplicationSyncReturn saveOperation(String value,SpreadSheetsSharedMethods resource){
 		ReceiveOperationArgs args;
 		args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
 		value=args.getArgs();
@@ -97,10 +130,10 @@ public class KafkaOperationsHandler {
 				resource.updateCell(cs.getSheetId(), cs.getCell(),cs.getRawValue(), cs.getUserId(), cs.getPassword());
 			}
 			result.setStatus(Status.OK);
-			versionNumber++;
 			System.out.println("MESSAGE RECEIVED <-----------------------> "+versionNumber+" --> OPERATIONS SENT "+opsSent);
 		}catch(WebApplicationException e) {
 			result.setStatus(e.getResponse().getStatusInfo().toEnum());
+			System.out.println("FAILED FAILED STATUS "+result.getStatus()+" OPERATION ------------------> "+args.getOperation());
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -113,6 +146,7 @@ public class KafkaOperationsHandler {
 			System.out.println("Message published with sequence number: " + sequenceNumber);
 			sync.addOperations(versionNumber,value);
 			opsSent++;
+			opsSent=sequenceNumber;
 		}else {
 			System.out.println("Failed to publish message");
 		}

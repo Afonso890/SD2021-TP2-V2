@@ -2,13 +2,13 @@ package tp1.api.clients;
 
 import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.namespace.QName;
 
+import javax.net.ssl.HttpsURLConnection;
 import org.glassfish.jersey.client.ClientConfig;
 
 import org.glassfish.jersey.client.ClientProperties;
 
+import javax.xml.namespace.QName;
 import com.sun.xml.ws.client.BindingProviderProperties;
 
 import jakarta.ws.rs.ProcessingException;
