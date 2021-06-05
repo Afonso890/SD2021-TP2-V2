@@ -1,11 +1,11 @@
 package tp1.api.replication;
 
 import jakarta.ws.rs.WebApplicationException;
-
 import jakarta.ws.rs.core.Response.Status;
 import tp1.api.Spreadsheet;
 import tp1.api.SpreadsheetValuesWrapper;
 import tp1.api.consts.Consts;
+import tp1.api.discovery.Discovery;
 import tp1.api.replication.args.CreateSpreadSheet;
 import tp1.api.replication.args.DeletSpreadsheet;
 import tp1.api.replication.args.DeleteUsersSheets;
@@ -14,25 +14,27 @@ import tp1.api.replication.args.Unshare;
 import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetsSharedMethods;
-import tp1.api.service.rest.RestSpreadsheetsReplication;
+import tp1.api.service.rest.RestSpreadsheets;
+import tp1.api.storage.StorageInterface;
 
-public class ReplicatedSheetsResources implements RestSpreadsheetsReplication {
+public class ReplicatedSheetsResources implements RestSpreadsheets {
 
-	private KafkaOperationsHandler operations;
 	private SyncPoint sync;
 	private SpreadSheetsSharedMethods resource;
-	public ReplicatedSheetsResources(SpreadSheetsSharedMethods resource, SyncPoint sync,KafkaOperationsHandler operations ) {
-		this.operations=operations;
-		this.sync=sync;
-		this.resource=resource;
-		System.out.println("==================================SERVER REPLICATED STARTED --------------------------------------->");
+	private KafkaOperationsHandler repManager;
+	
+	public ReplicatedSheetsResources(String domainName, Discovery martian, String uri, StorageInterface spreadSheets, SyncPoint sync) {
+		resource = new SpreadSheetsSharedMethods(domainName, martian, uri, spreadSheets);
+		repManager=new KafkaOperationsHandler(domainName,resource,sync);
+		this.sync=sync;		
+
 	}
+	
 	@Override
-	public String createSpreadsheet(Long version, Spreadsheet sheet, String password) {
+	public String createSpreadsheet(Spreadsheet sheet, String password) {
 		CreateSpreadSheet create = new CreateSpreadSheet(sheet, password);
-		
-		operations.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(create));
-		String result = sync.waitForResult(operations.operationNumberSentByThisReplica());
+		repManager.sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(create));
+		String result = sync.waitForResult(repManager.sentOperationsCounter());
 		
 		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
 	
@@ -43,10 +45,10 @@ public class ReplicatedSheetsResources implements RestSpreadsheetsReplication {
 	}
 
 	@Override
-	public void deleteSpreadsheet(Long version, String sheetId, String password) {
+	public void deleteSpreadsheet(String sheetId, String password) {
 		DeletSpreadsheet delete = new DeletSpreadsheet(password, sheetId);
-		operations.sender(ReceiveOperationArgs.DELETE_SPREADSHEET,Consts.json.toJson(delete));
-		String result = sync.waitForResult(operations.operationNumberSentByThisReplica());
+		repManager.sender(ReceiveOperationArgs.DELETE_SPREADSHEET,Consts.json.toJson(delete));
+		String result = sync.waitForResult(repManager.sentOperationsCounter());
 		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
 		if(res.getStatus()!=Status.OK) {
 			throw new WebApplicationException(res.getStatus());
@@ -54,10 +56,10 @@ public class ReplicatedSheetsResources implements RestSpreadsheetsReplication {
 	}
 
 	@Override
-	public void deleteSpreadsheet(Long version, String userId) {
+	public void deleteSpreadsheet(String userId) {
 		DeleteUsersSheets delete = new DeleteUsersSheets(userId);
-		operations.sender(ReceiveOperationArgs.DELETE_USERS_SPREADSHEET,Consts.json.toJson(delete));
-		String result = sync.waitForResult(operations.operationNumberSentByThisReplica());
+		repManager.sender(ReceiveOperationArgs.DELETE_USERS_SPREADSHEET,Consts.json.toJson(delete));
+		String result = sync.waitForResult(repManager.sentOperationsCounter());
 		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
 		if(res.getStatus()!=Status.OK) {
 			throw new WebApplicationException(res.getStatus());
@@ -65,59 +67,50 @@ public class ReplicatedSheetsResources implements RestSpreadsheetsReplication {
 	}
 
 	@Override
-	public Spreadsheet getSpreadsheet(Long version, String sheetId, String userId, String password) {
-		// TODO Auto-generated method stub
+	public void updateCell(String sheetId, String cell, String rawValue, String userId, String password) {
+		Update update = new Update(sheetId, cell, rawValue, userId, password);
+		repManager.sender(ReceiveOperationArgs.UPDATE_SPREADSHEET,Consts.json.toJson(update));
+		String result = sync.waitForResult(repManager.sentOperationsCounter());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		if(res.getStatus()!=Status.OK) {
+			throw new WebApplicationException(res.getStatus());
+		}
+	}
+
+	@Override
+	public void shareSpreadsheet(String sheetId, String userId, String password) {
+		Share share = new Share(sheetId, userId, password);
+		repManager.sender(ReceiveOperationArgs.SHARE_SPREADSHEET,Consts.json.toJson(share));
+		String result = sync.waitForResult(repManager.sentOperationsCounter());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		if(res.getStatus()!=Status.OK) {
+			throw new WebApplicationException(res.getStatus());
+		}
+	}
+
+	@Override
+	public void unshareSpreadsheet(String sheetId, String userId, String password) {
+		Unshare unshare = new Unshare(sheetId, userId, password);
+		repManager.sender(ReceiveOperationArgs.UNSHARE_SPREADSHEET,Consts.json.toJson(unshare));
+		String result = sync.waitForResult(repManager.sentOperationsCounter());
+		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		if(res.getStatus()!=Status.OK) {
+			throw new WebApplicationException(res.getStatus());
+		}
+	}
+	@Override
+	public Spreadsheet getSpreadsheet(String sheetId ,String userId,String password) {
 		return resource.getSpreadsheet(sheetId, userId, password);
 	}
-
+		
 	@Override
-	public String[][] getSpreadsheetValues(Long version, String sheetId, String userId, String password) {		
+	public String[][] getSpreadsheetValues(String sheetId, String userId,String password){
 		return resource.getSpreadsheetValues(sheetId, userId, password);
 	}
-
+	
 	@Override
-	public SpreadsheetValuesWrapper importRange(Long version, String sheetId, String range, String email) {
+	public SpreadsheetValuesWrapper importRange(String sheetId,String range,String email) {
 		return resource.importRange(sheetId, range, email);
-	}
-
-	@Override
-	public void updateCell(Long version, String sheetId, String cell, String rawValue, String userId, String password) {
-		try {
-			Update update = new Update(sheetId, cell, rawValue, userId, password);
-			operations.sender(ReceiveOperationArgs.UPDATE_SPREADSHEET,Consts.json.toJson(update));
-			String result = sync.waitForResult(operations.operationNumberSentByThisReplica());
-			ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
-			if(res.getStatus()!=Status.OK) {
-				throw new WebApplicationException(res.getStatus());
-			}
-		}catch(WebApplicationException e) {
-			throw e;
-		}catch(Exception e2) {
-			e2.printStackTrace();
-			throw e2;
-		}		
-	}
-
-	@Override
-	public void shareSpreadsheet(Long version, String sheetId, String userId, String password) {
-		Share share = new Share(sheetId, userId, password);
-		operations.sender(ReceiveOperationArgs.SHARE_SPREADSHEET,Consts.json.toJson(share));
-		String result = sync.waitForResult(operations.operationNumberSentByThisReplica());
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
-		if(res.getStatus()!=Status.OK) {
-			throw new WebApplicationException(res.getStatus());
-		}
-	}
-
-	@Override
-	public void unshareSpreadsheet(Long version, String sheetId, String userId, String password) {
-		Unshare unshare = new Unshare(sheetId, userId, password);
-		operations.sender(ReceiveOperationArgs.UNSHARE_SPREADSHEET,Consts.json.toJson(unshare));
-		String result = sync.waitForResult(operations.operationNumberSentByThisReplica());
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
-		if(res.getStatus()!=Status.OK) {
-			throw new WebApplicationException(res.getStatus());
-		}
 	}
 	
 }

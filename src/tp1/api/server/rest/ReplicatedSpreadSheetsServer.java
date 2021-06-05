@@ -3,6 +3,7 @@ package tp1.api.server.rest;
 import java.net.InetAddress;
 
 
+
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -13,12 +14,9 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.api.discovery.Discovery;
-import tp1.api.replication.KafkaOperationsHandler;
 import tp1.api.replication.ReplicatedSheetsResources;
-import tp1.api.replication.VersionFilter;
 import tp1.api.replication.sync.SyncPoint;
-import tp1.api.servers.resources.SpreadSheetsSharedMethods;
-import tp1.api.service.rest.RestSpreadsheetsReplication;
+import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.storage.MemoryStorage;
 import tp1.util.InsecureHostnameVerifier;
 
@@ -65,16 +63,8 @@ public class ReplicatedSpreadSheetsServer {
 			
 			martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 			martian.start();
-			SpreadSheetsSharedMethods resource=new SpreadSheetsSharedMethods(domainName, martian, serverURI, new MemoryStorage());  //SpreadSheetResource(domainName,martian,serverURI, new MemoryStorage());
-			SyncPoint sync = SyncPoint.getInstance();
-			KafkaOperationsHandler repManager= new KafkaOperationsHandler(domainName,resource,sync);
-			//(String topic,SpreadSheetResource resource, SyncPoint sync)
-			RestSpreadsheetsReplication rest = new ReplicatedSheetsResources(resource,sync,repManager);
+			RestSpreadsheets rest = new ReplicatedSheetsResources(domainName, martian, serverURI, new MemoryStorage(),SyncPoint.getInstance());
 			config.register(rest);		
-			config.register( new VersionFilter(repManager));
-
-			
-			//SpreadSheetResource resource, SyncPoint sync,KafkaOperationsHandler operations )
 			/*
 			 * This effectively starts the server (with
 				their own threads to handle client

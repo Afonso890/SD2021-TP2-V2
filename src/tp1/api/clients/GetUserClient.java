@@ -35,7 +35,6 @@ public class GetUserClient {
 
 	
 	public static Client getClient() {
-		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 
 		ClientConfig config = new ClientConfig();
 		//how much time until we timeout when opening the TCP connection to the server
@@ -46,6 +45,7 @@ public class GetUserClient {
 		return client;
 	}
 	public static User getUser(String userId, String password, String serviceId, Client client, Discovery martian) {
+		
 		User u=null;
 		
 		//System.out.println("DOMAIN: "+domainName);
@@ -60,6 +60,7 @@ public class GetUserClient {
 		if(Discovery.SOAP.equals(uris[uris.length-1])) {
 			return getSoapUser(serverUrl,userId,password);
 		}
+		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 		WebTarget target = client.target( serverUrl ).path( RestUsers.PATH );
 
 		short retries = 0;
@@ -101,6 +102,8 @@ public class GetUserClient {
 	private static User getSoapUser(String serverUrl,String userId,String password) {
 		//Obtaining s stub for the remote soap service
 		SoapUsers users = null;
+		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
+
 		try {
 			QName QNAME = new QName(SoapUsers.NAMESPACE, SoapUsers.NAME);
 			Service service = Service.create( new URL(serverUrl + USERS_WSDL), QNAME );
@@ -135,12 +138,14 @@ public class GetUserClient {
 				return u;
 			} catch (tp1.api.service.soap.UsersException e) {
 				System.out.println("Cound not get user: " + e.getMessage());
+				e.printStackTrace();
 				success = true;
 			} catch (WebServiceException wse) {
 				System.out.println("Communication error.");
 				wse.printStackTrace();
 				retries++;
-				try { Thread.sleep( Consts.RETRY_PERIOD ); } catch (InterruptedException e) {
+				try { Thread.sleep( Consts.RETRY_PERIOD ); } 
+				catch (InterruptedException e) {
 					//nothing to be done here, if this happens we will just retry sooner.
 				}
 				System.out.println("Retrying to execute request.");
