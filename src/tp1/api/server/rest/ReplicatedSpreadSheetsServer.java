@@ -2,6 +2,7 @@ package tp1.api.server.rest;
 
 import java.net.InetAddress;
 
+
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -16,8 +17,7 @@ import tp1.api.replication.KafkaOperationsHandler;
 import tp1.api.replication.ReplicatedSheetsResources;
 import tp1.api.replication.VersionFilter;
 import tp1.api.replication.sync.SyncPoint;
-import tp1.api.servers.resources.SpreadSheetResource;
-import tp1.api.service.rest.RestSpreadsheets;
+import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 import tp1.api.service.rest.RestSpreadsheetsReplication;
 import tp1.api.storage.MemoryStorage;
 import tp1.util.InsecureHostnameVerifier;
@@ -65,7 +65,7 @@ public class ReplicatedSpreadSheetsServer {
 			
 			martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 			martian.start();
-			RestSpreadsheets resource=new SpreadSheetResource(domainName,martian,serverURI, new MemoryStorage());
+			SpreadSheetsSharedMethods resource=new SpreadSheetsSharedMethods(domainName, martian, serverURI, new MemoryStorage());  //SpreadSheetResource(domainName,martian,serverURI, new MemoryStorage());
 			SyncPoint sync = SyncPoint.getInstance();
 			KafkaOperationsHandler repManager= new KafkaOperationsHandler(domainName,resource,sync);
 			//(String topic,SpreadSheetResource resource, SyncPoint sync)

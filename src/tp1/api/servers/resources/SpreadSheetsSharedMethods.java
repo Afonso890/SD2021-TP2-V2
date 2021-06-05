@@ -1,14 +1,5 @@
 package tp1.api.servers.resources;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashSet;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -34,7 +25,6 @@ public class SpreadSheetsSharedMethods {
 	private Client client;
 	private int ids;
 	private String uri;
-	private String apiKey ="AIzaSyBlavaHw1h9Th_RouiUa70iMWAhB18oizk";
 
 	public SpreadSheetsSharedMethods(String domainName, Discovery martian, String uri, StorageInterface spreadSheets) {
 		this.domainName=domainName;
@@ -124,7 +114,6 @@ public class SpreadSheetsSharedMethods {
 		}catch(Exception e) {
 			throw new WebApplicationException( Status.BAD_REQUEST );
 		}
-
 		return sheet.getSheetId();
 	}
 

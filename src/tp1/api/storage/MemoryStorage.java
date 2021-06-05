@@ -24,15 +24,10 @@ public class MemoryStorage implements StorageInterface {
 			return null;
 		}
 	}
-
 	@Override
 	public Spreadsheet put(String sheetid, Spreadsheet sheet) {
 		SpreadsheetWrapper sw = new SpreadsheetWrapper(sheet,System.currentTimeMillis());
-		try {
-			sheet = spreadSheets.put(sheetid,sw).getSheet();
-		}catch(Exception e) {
-			sheet=null;
-		}
+		spreadSheets.put(sheetid,sw);
 		return sheet;
 	}
 

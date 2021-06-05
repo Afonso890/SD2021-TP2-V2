@@ -4,7 +4,6 @@ import jakarta.inject.Singleton;
 import tp1.api.Spreadsheet;
 import tp1.api.SpreadsheetValuesWrapper;
 import tp1.api.discovery.Discovery;
-import tp1.api.replication.sync.SyncPoint;
 import tp1.api.service.rest.RestSpreadsheets;
 import tp1.api.storage.StorageInterface;
 
