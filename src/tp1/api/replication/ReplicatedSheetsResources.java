@@ -146,15 +146,10 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 				//System.out.println("Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
 				versionNumber=r.offset();
 				ReplicationSyncReturn res=saveOperation(r.value());
-				if(versionNumber==operationSentOffset) {
-					sync.setResult(versionNumber,Consts.json.toJson(res));	
-				}else {
-					sync.setVersionNumber(versionNumber);
-				}
+				sync.setResult(versionNumber,Consts.json.toJson(res));	
 			}
 		});
 	}
-
 	private long sentOperationsCounter() {
 		return operationSentOffset;
 	}
