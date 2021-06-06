@@ -42,7 +42,7 @@ public class Discovery {
 	// The pre-aggreed multicast endpoint assigned to perform discovery. 
 	static final InetSocketAddress DISCOVERY_ADDR = new InetSocketAddress("226.226.226.226", 2266);
 	static final int DISCOVERY_PERIOD = 1000;
-	static final int DISCOVERY_TIMEOUT = 10000;
+	static final int DISCOVERY_TIMEOUT = 20000;
 	static final int ZERO=0;
 	static final int ONE=1;
 
@@ -149,9 +149,21 @@ public class Discovery {
 					}
 				}
 			}).start();
+			
+			/*periodically removes the uris from terminated servers*/
+			new Thread(() -> {
+				for (;;) {
+					try {
+						Thread.sleep(DISCOVERY_PERIOD);
+						removeLastKnownService();
+					} catch (Exception e) {}
+				}
+			}).start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 	/**
 	 * Returns the known servers for a service.
