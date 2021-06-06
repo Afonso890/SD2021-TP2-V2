@@ -47,8 +47,6 @@ public class GetUserClient {
 	public static User getUser(String userId, String password, String serviceId, Client client, Discovery martian) {
 		
 		User u=null;
-		
-		//System.out.println("DOMAIN: "+domainName);
 		String [] uris = martian.knownUrisOf(serviceId);
 		if(uris==null) {
 			return null;
@@ -60,12 +58,12 @@ public class GetUserClient {
 		if(Discovery.SOAP.equals(uris[uris.length-1])) {
 			return getSoapUser(serverUrl,userId,password);
 		}
+		
 		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 		WebTarget target = client.target( serverUrl ).path( RestUsers.PATH );
 
 		short retries = 0;
 		boolean success = false;
-
 		while(!success && retries <Consts.MAX_RETRIES) {
 			
 			try {

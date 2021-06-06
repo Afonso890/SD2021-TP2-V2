@@ -42,7 +42,7 @@ public class Discovery {
 	// The pre-aggreed multicast endpoint assigned to perform discovery. 
 	static final InetSocketAddress DISCOVERY_ADDR = new InetSocketAddress("226.226.226.226", 2266);
 	static final int DISCOVERY_PERIOD = 1000;
-	static final int DISCOVERY_TIMEOUT = 5000;
+	static final int DISCOVERY_TIMEOUT = 10000;
 	static final int ZERO=0;
 	static final int ONE=1;
 
@@ -56,13 +56,15 @@ public class Discovery {
 	private String serviceId;
 	
 	private Map<String,Wrapper> services;
-
+	private long id;
 	/**
 	 * @param  serviceName the name of the service to announce
 	 * @param  serviceURI an uri string - representing the contact endpoint of the service being announced
 	 */
 	public Discovery( InetSocketAddress addr,String serviceName,String serviceURI, String domain_Name) {
 		services = new HashMap<String, Wrapper>();
+		id=System.nanoTime();
+		//System.out.println("DISCOVERY  STARTED --------------> "+id);
 		this.addr = addr;
 		this.serviceName = serviceName;
 		this.serviceURI  = serviceURI;
@@ -78,10 +80,8 @@ public class Discovery {
 	}
 	private synchronized void removeLastKnownService() {
 		long now= System.currentTimeMillis();
-
 		Entry<String,Wrapper> en;
 		Iterator<Entry<String,Wrapper>> its = services.entrySet().iterator();
-		
 		while(its.hasNext()) {
 			en = its.next();
 			if(now-en.getValue().getLastTime()>DISCOVERY_TIMEOUT) {
@@ -103,7 +103,6 @@ public class Discovery {
 		//Random rd = new Random();
 		//times[rd.nextInt(times.length)]
 		try {
-			@SuppressWarnings("resource")
 			MulticastSocket ms = new MulticastSocket( addr.getPort());
 			ms.joinGroup(addr, NetworkInterface.getByInetAddress(InetAddress.getLocalHost()));
 			// start thread to send periodic announcements
@@ -124,7 +123,6 @@ public class Discovery {
 			new Thread(() -> {
 				Wrapper wp;
 				DatagramPacket pkt = new DatagramPacket(new byte[1024], 1024);
-				
 				for (;;) {
 					try {
 						pkt.setLength(1024);
@@ -155,25 +153,27 @@ public class Discovery {
 			e.printStackTrace();
 		}
 	}
-
 	/**
 	 * Returns the known servers for a service.
 	 * 
-	 * @param  serviceName the name of the service being discovered
+	 * @param  serviceNameArg the name of the service being discovered
 	 * @return an array of URI with the service instances discovered. 
 	 * 
 	 */
-	public String [] knownUrisOf(String serviceName) {
+	public String [] knownUrisOf(String serviceNameArg) {
+		//System.out.println("GOING TO GET THE USER "+serviceNameArg+" id "+id+" lengh "+services.size());
 		synchronized (services) {
-			Wrapper wp =services.get(serviceName);
+			Wrapper wp =services.get(serviceNameArg);
 			if(wp==null) {
 				return null;
 			}
-
 			return wp.getUris();
 		}
 	}
-	public static Discovery getDiscovery(String serviceName,String serviceURI, String domain_Name) {
-		return new Discovery(DISCOVERY_ADDR,serviceName,serviceURI,domain_Name);
+	public long getId() {
+		return id;
+	}
+	public static Discovery getDiscovery(String serviceNameArg,String serviceURI, String domain_Name) {
+		return new Discovery(DISCOVERY_ADDR,serviceNameArg,serviceURI,domain_Name);
 	}
 }

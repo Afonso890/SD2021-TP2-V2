@@ -27,17 +27,13 @@ public class KafkaOperationsHandler {
 	private long versionNumber;
 	KafkaPublisher publisher;
 	private long opsSent;
-	//private Queue<String> missedOperations;
 	public KafkaOperationsHandler(String topic,SpreadSheetsSharedMethods resource, SyncPoint sync) {
-		// TODO Auto-generated constructor stub
 		publisher = KafkaPublisher.createPublisher(KAFKA_HOSTS);
-		//missedOperations=new ConcurrentLinkedQueue<String>(); //nk LinkedList<String>();
 		opsSent=-1L;
 		this.sync=sync;
 		this.topic=topic;
 		versionNumber=-1L;
 		receiver(resource);
-		//updateReplica(resource);
 	}
 	
 	private void receiver(SpreadSheetsSharedMethods resource) {
@@ -48,30 +44,13 @@ public class KafkaOperationsHandler {
 		subscriber.start( new RecordProcessor() {
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
-				System.out.println("Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
+				//System.out.println("Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
 				versionNumber=r.offset();
 				ReplicationSyncReturn res=saveOperation(r.value(),resource);
-				sync.setResult(versionNumber,Consts.json.toJson(res));
+				sync.setResult(versionNumber,Consts.json.toJson(res));	
 			}
 		});
 	}
-	/*
-	private synchronized void  updateReplica(SpreadSheetsSharedMethods resource) {
-		try {
-			Thread.sleep(1000);
-			System.out.println("GOING TO UPDATE OLD OPERATIONS -----> LENGTH "+missedOperations.size());
-			while(missedOperations.size()>0) {
-				try {
-					saveOperation(missedOperations.poll(),resource);
-				}catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		missedOperations=null;
-	}*/
 	public long getVersionNumber() {
 		return versionNumber;
 	}
