@@ -60,7 +60,6 @@ public class ReplicatedSpreadSheetsServer {
 			 */
 			String serverURI = String.format("https://%s:%s/rest", ip, PORT);
 			
-			
 			martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 			martian.start();
 			RestSpreadsheets rest = new ReplicatedSheetsResources(domainName, martian, serverURI, new MemoryStorage(),SyncPoint.getInstance());

@@ -19,7 +19,7 @@ import tp1.util.GetAbstractSpreadSheet;
 
 public class SpreadSheetsSharedMethods {
 	//private static Logger Log = Logger.getLogger(SpreadSheetResource.class.getName());
-	public static Discovery martian;
+	private Discovery martian;
 	private String domainName;
 	private StorageInterface spreadSheets;
 	private Client client;
@@ -30,7 +30,7 @@ public class SpreadSheetsSharedMethods {
 		this.domainName=domainName;
 		this.client = Consts.client;
 		this.spreadSheets=spreadSheets;
-		SpreadSheetsSharedMethods.martian=martian;
+		this.martian=martian;
 		this.uri=uri;
 		ids=0;
 	}
