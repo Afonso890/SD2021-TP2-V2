@@ -19,7 +19,7 @@ import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 public class KafkaOperationsHandler {
 	
-
+	/*
 	private final String KAFKA_HOSTS="localhost:9092, kafka:9092";
 
 	private String topic;
@@ -100,4 +100,5 @@ public class KafkaOperationsHandler {
 			System.out.println("Failed to publish message");
 		}
 	}
+	*/
 }

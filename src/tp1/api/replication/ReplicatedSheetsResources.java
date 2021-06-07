@@ -26,6 +26,8 @@ import tp1.api.storage.StorageInterface;
 public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods implements RestSpreadsheets {
 	private static final long SLEEP_BEFORE_READING_OLD_OPERATIONS=1000;
 	private static final long MINUS_ONE=-1L;
+	private static final int TRYOUT_TIMES=6;
+
 
 	private static final String KAFKA_HOSTS="localhost:9092, kafka:9092";
 	private SyncPoint sync;
@@ -33,7 +35,8 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 	private KafkaPublisher publisher;
 	private long versionNumber;
 	private long operationSentOffset;
-	
+	ReceiveOperationArgs args;
+
 	public ReplicatedSheetsResources(String domainName, Discovery martian, String uri, StorageInterface spreadSheets, SyncPoint sync) {
 		super(domainName, martian, uri, spreadSheets);
 		//resource = new SpreadSheetsSharedMethods(domainName, martian, uri, spreadSheets);
@@ -42,6 +45,7 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 		this.sync=sync;
 		operationSentOffset=MINUS_ONE;
 		versionNumber=MINUS_ONE;
+		args = new ReceiveOperationArgs(null,null);
 		receiver();
 		//System.out.println("****************************** REPLICA STARTED ++++++++++++++++++++++++++++++ "+martian.getId());
 	}
@@ -132,7 +136,16 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 	
 	private void receiver() {
 		try {
-			Thread.sleep(SLEEP_BEFORE_READING_OLD_OPERATIONS);
+			Discovery d = getDiscovery();
+			int tries=0;
+			while(!d.hasThisDomain(getUsersDomain())&&tries<TRYOUT_TIMES) {
+				Thread.sleep(SLEEP_BEFORE_READING_OLD_OPERATIONS);
+				tries++;
+			}
+			if(tries==TRYOUT_TIMES) {
+				System.err.println("ERROR: COULD NOT CONTACT THE USERS' DOMAIN! \n");
+				System.exit(1);
+			}
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -187,14 +200,14 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 		return result;
 	}
 	private void sender(String operation, String value) {
-		value = Consts.json.toJson(new ReceiveOperationArgs(operation,value));
-		long sequenceNumber = publisher.publish(getDomain(),value);
+		args.setOperation(operation);
+		args.setArgs(value);
+		long sequenceNumber = publisher.publish(getDomain(),Consts.json.toJson(args));
 		if(sequenceNumber >= 0) {
 			System.out.println("Message published with sequence number: " + sequenceNumber);
 			operationSentOffset=sequenceNumber;
 		}else {
 			System.out.println("Failed to publish message");
 		}
-	}
-	
+	}	
 }

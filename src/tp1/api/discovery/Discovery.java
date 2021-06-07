@@ -182,6 +182,11 @@ public class Discovery {
 			return wp.getUris();
 		}
 	}
+	public boolean hasThisDomain(String serviceArg) {
+		synchronized (serviceArg) {
+			return services.containsKey(serviceArg);
+		}
+	}
 	public long getId() {
 		return id;
 	}

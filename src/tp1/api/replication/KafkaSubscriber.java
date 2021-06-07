@@ -1,6 +1,7 @@
 package tp1.api.replication;
 
 import java.time.Duration;
+
 import java.util.List;
 import java.util.Properties;
 
@@ -48,8 +49,7 @@ public class KafkaSubscriber {
 					recordProcessor.onReceive(r);
 				});
 			}
-		}).start();
-		
+		}).start();	
 	}
 
 	public void consume(SubscriberListener listener) {

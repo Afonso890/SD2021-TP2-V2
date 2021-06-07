@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 public class SyncPoint
 {
 	private static SyncPoint instance;
-
+	private static long CLEAN_PERIOD=8000;
 	public static synchronized SyncPoint getInstance() {
 		if( instance == null) {
 			instance = new SyncPoint();
@@ -25,6 +25,7 @@ public class SyncPoint
 	private SyncPoint() {
 		result = new HashMap<Long,String>();
 		version=-1L;
+		removeDoCleabUp();
 	}
 	
 	
@@ -77,5 +78,17 @@ public class SyncPoint
 			if( it.next().getKey() < n)
 				it.remove();
 		}
+	}
+	private void removeDoCleabUp() {
+		new Thread(()->{
+			while(true) {
+				try {
+					Thread.sleep(CLEAN_PERIOD);
+					cleanupUntil(version);
+				}catch(Exception e) {
+					
+				}
+			}
+		}).start();
 	}
 }
