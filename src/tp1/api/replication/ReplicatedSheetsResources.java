@@ -2,6 +2,7 @@ package tp1.api.replication;
 
 import java.util.LinkedList;
 
+
 import java.util.List;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,10 +21,10 @@ import tp1.api.replication.args.Unshare;
 import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetsSharedMethods;
-import tp1.api.service.rest.RestSpreadsheets;
+import tp1.api.service.rest.RestSpreadsheetsReplication;
 import tp1.api.storage.StorageInterface;
 
-public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods implements RestSpreadsheets {
+public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods implements RestSpreadsheetsReplication {
 	private static final long SLEEP_BEFORE_READING_OLD_OPERATIONS=1000;
 	private static final long MINUS_ONE=-1L;
 	private static final int TRYOUT_TIMES=6;
@@ -33,7 +34,6 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 	private SyncPoint sync;
 	//private KafkaOperationsHandler repManager;
 	private KafkaPublisher publisher;
-	private long versionNumber;
 	private long operationSentOffset;
 	ReceiveOperationArgs args;
 
@@ -44,20 +44,17 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 		//repManager=new KafkaOperationsHandler(domainName,resource,sync);
 		this.sync=sync;
 		operationSentOffset=MINUS_ONE;
-		versionNumber=MINUS_ONE;
 		args = new ReceiveOperationArgs(null,null);
 		receiver();
 		//System.out.println("****************************** REPLICA STARTED ++++++++++++++++++++++++++++++ "+martian.getId());
 	}
 	
 	@Override
-	public String createSpreadsheet(Spreadsheet sheet, String password) {
+	public String createSpreadsheet(Long version, Spreadsheet sheet, String password) {
 		CreateSpreadSheet create = new CreateSpreadSheet(sheet, password);
 		sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(create));
-		String result = sync.waitForResult(sentOperationsCounter());
-		
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
-	
+		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
+			
 		if(res.getStatus()==Status.OK) {
 			return res.getObjResponse();
 		}
@@ -65,72 +62,70 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 	}
 
 	@Override
-	public void deleteSpreadsheet(String sheetId, String password) {
+	public void deleteSpreadsheet(Long version, String sheetId, String password) {
 		DeletSpreadsheet delete = new DeletSpreadsheet(password, sheetId);
 		sender(ReceiveOperationArgs.DELETE_SPREADSHEET,Consts.json.toJson(delete));
-		String result = sync.waitForResult(sentOperationsCounter());
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
 		if(res.getStatus()!=Status.OK) {
 			throw new WebApplicationException(res.getStatus());
 		}
 	}
 
 	@Override
-	public void deleteSpreadsheet(String userId) {
+	public void deleteSpreadsheet(Long version, String userId) {
 		DeleteUsersSheets delete = new DeleteUsersSheets(userId);
 		sender(ReceiveOperationArgs.DELETE_USERS_SPREADSHEET,Consts.json.toJson(delete));
-		String result = sync.waitForResult(sentOperationsCounter());
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
 		if(res.getStatus()!=Status.OK) {
 			throw new WebApplicationException(res.getStatus());
 		}
 	}
 
 	@Override
-	public void updateCell(String sheetId, String cell, String rawValue, String userId, String password) {
+	public void updateCell(Long version, String sheetId, String cell, String rawValue, String userId, String password) {
 		Update update = new Update(sheetId, cell, rawValue, userId, password);
 		sender(ReceiveOperationArgs.UPDATE_SPREADSHEET,Consts.json.toJson(update));
-		String result = sync.waitForResult(sentOperationsCounter());
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
 		if(res.getStatus()!=Status.OK) {
 			throw new WebApplicationException(res.getStatus());
 		}
 	}
 
 	@Override
-	public void shareSpreadsheet(String sheetId, String userId, String password) {
+	public void shareSpreadsheet(Long version, String sheetId, String userId, String password) {
 		Share share = new Share(sheetId, userId, password);
 		sender(ReceiveOperationArgs.SHARE_SPREADSHEET,Consts.json.toJson(share));
-		String result = sync.waitForResult(sentOperationsCounter());
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
 		if(res.getStatus()!=Status.OK) {
 			throw new WebApplicationException(res.getStatus());
 		}
 	}
 
 	@Override
-	public void unshareSpreadsheet(String sheetId, String userId, String password) {
+	public void unshareSpreadsheet(Long version, String sheetId, String userId, String password) {
 		Unshare unshare = new Unshare(sheetId, userId, password);
 		sender(ReceiveOperationArgs.UNSHARE_SPREADSHEET,Consts.json.toJson(unshare));
-		String result = sync.waitForResult(sentOperationsCounter());
-		ReplicationSyncReturn res=Consts.json.fromJson(result,ReplicationSyncReturn.class);
+		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
 		if(res.getStatus()!=Status.OK) {
 			throw new WebApplicationException(res.getStatus());
 		}
 	}
 	
 	@Override
-	public Spreadsheet getSpreadsheet(String sheetId ,String userId,String password) {
+	public Spreadsheet getSpreadsheet(Long version, String sheetId,String userId,String password) {
+		sync.waitForVersion(version);
 		return super.getSpreadsheet(sheetId, userId, password);
 	}
 		
 	@Override
-	public String[][] getSpreadsheetValues(String sheetId, String userId,String password){
+	public String[][] getSpreadsheetValues(Long version, String sheetId, String userId,String password){
+		sync.waitForVersion(version);
 		return super.getSpreadsheetValues(sheetId, userId, password);
 	}
 	
 	@Override
-	public SpreadsheetValuesWrapper importRange(String sheetId,String range,String email) {
+	public SpreadsheetValuesWrapper importRange(Long version, String sheetId,String range,String email) {
+		sync.waitForVersion(version);
 		return super.importRange(sheetId, range, email);
 	}
 	
@@ -157,14 +152,17 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
 				//System.out.println("Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
-				versionNumber=r.offset();
 				ReplicationSyncReturn res=saveOperation(r.value());
-				sync.setResult(versionNumber,Consts.json.toJson(res));	
+				sync.setResult(r.offset(),res);	
 			}
 		});
 	}
-	private long sentOperationsCounter() {
-		return operationSentOffset;
+	private long versionToWaitFor(Long clientVersion) {
+		if(clientVersion==null) {
+			return operationSentOffset;
+		}else {
+			return Math.max(operationSentOffset, clientVersion);
+		}
 	}
 	private ReplicationSyncReturn saveOperation(String value){
 		ReceiveOperationArgs args;
