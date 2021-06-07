@@ -23,6 +23,7 @@ public class DropboxOperations {
 	private OAuth20Service service;
 	private OAuth2AccessToken accessToken;
 	private Gson json;
+	Consts consts;
 	private static final String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 	private static final String CREATE_FOLDER_V2_URL = "https://api.dropboxapi.com/2/files/create_folder_v2";
 	private static final String UPLOAD_FILE_URL = "https://content.dropboxapi.com/2/files/upload";
@@ -34,8 +35,10 @@ public class DropboxOperations {
 	private String directoryName;
 
 	public DropboxOperations(String directoryName, boolean clean) {
-		service = new ServiceBuilder(Consts.apiKey).apiSecret(Consts.apiSecret).build(DropboxApi20.INSTANCE);
-		accessToken = new OAuth2AccessToken(Consts.accessTokenStr);	
+		System.out.println("GOT TO THE OPERASTIONS CONSTRUCTORRRRRRRRRRRRRRRRRRRRRR");
+		consts = new Consts();
+		service = new ServiceBuilder(consts.apiKey).apiSecret(consts.apiSecret).build(DropboxApi20.INSTANCE);
+		accessToken = new OAuth2AccessToken(consts.accessTokenStr);	
 		json=new Gson();
 		this.directoryName="/sdtp2"+directoryName;
 		if(clean) {

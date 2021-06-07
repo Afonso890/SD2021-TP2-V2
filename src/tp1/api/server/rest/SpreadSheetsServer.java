@@ -1,5 +1,6 @@
 package tp1.api.server.rest;
 
+import java.io.File;
 import java.net.InetAddress;
 
 import java.net.URI;
@@ -59,11 +60,10 @@ public class SpreadSheetsServer {
 			http://192.168.1.103:8080/rest
 		 */
 		String serverURI = String.format("https://%s:%s/rest", ip, PORT);
-		
-		
+				
 		martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 		martian.start();
-		
+		System.out.println("ARGS DO PROXY");
 		config.register(new SpreadSheetResource(domainName,martian,serverURI, storage));		
 		/*
 		 * This effectively starts the server (with

@@ -14,6 +14,8 @@ COPY trab.props trab.props
 COPY server.ks server.ks
 COPY sheets.ks sheets.ks
 
+COPY keys keys
+
 # copy truststore
 COPY truststore.ks truststore.ks
 

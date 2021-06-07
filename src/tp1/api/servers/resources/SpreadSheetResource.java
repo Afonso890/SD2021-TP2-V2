@@ -1,4 +1,15 @@
 package tp1.api.servers.resources;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+import java.util.stream.Stream;
+
 import jakarta.inject.Singleton;
 
 import tp1.api.Spreadsheet;
@@ -21,7 +32,10 @@ public class SpreadSheetResource implements RestSpreadsheets{
 	
 	@Override
 	public String createSpreadsheet(Spreadsheet sheet, String password) {
+		System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
 		String result = resource.createSpreadsheet(sheet, password);
+
 		//publish
 		return result;
 	}

@@ -6,6 +6,7 @@ import tp1.api.dropbox.DropboxOperations;
 public class DropBoxStorage implements StorageInterface{
 	DropboxOperations dp;
 	public DropBoxStorage(String domainName, boolean clean) {
+		System.out.println("DROPBOX STORAGE CONSTRUCTORRRRRRRRRRRRRRRRRRRRRRRRRRR");
 		dp=new DropboxOperations("/"+domainName,clean);
 	}
 

@@ -1,6 +1,10 @@
 package tp1.api.spreadsheet.clients;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,7 +35,7 @@ public class ImportRange {
 
 	public final static String SHEETS_WSDL = "/spreadsheets/?wsdl";
 	private final static SheetsCache cache = new SheetsCache();
-	private static String apiKey ="AIzaSyBlavaHw1h9Th_RouiUa70iMWAhB18oizk";
+	private static String apiKey = "";// ="AIzaSyBlavaHw1h9Th_RouiUa70iMWAhB18oizk";
 	private static String GOOGLE_IMPORT_RANGE_TAG="google";
 		
 	public static String [][] importRange(String url, String range, String email,Client client) {
@@ -143,6 +147,38 @@ public class ImportRange {
 		String mat[][]=null;
 			try {
 				String urlGoogle =  url.substring(0, 30);
+				
+				
+				//String path = new File("").getAbsolutePath();
+				
+				String path = System.getProperty("user.dir")+"/googleKey.txt";
+				System.out.println(path);
+				
+			
+				File file=new File("/home/sd/keys/googleKey.txt");
+				
+		        if( file.exists() )
+		        {
+		            System.out.println("File exists");
+		        }
+		        else
+		        {
+		            System.out.println("Doesn't exist");
+		        }
+		        
+				try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+				    String line;
+				    while ((line = br.readLine()) != null) {
+				    	System.out.println("THIS IS THE KEYYYYYYYYYYYYYYY" + line);
+						apiKey = line;
+				    }
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				urlGoogle = urlGoogle + "v4/spreadsheets/" + sheetId + "/values/" + range + "?key=" + apiKey;
 				HttpURLConnection con = (HttpURLConnection) new URL(urlGoogle).openConnection();
 				
