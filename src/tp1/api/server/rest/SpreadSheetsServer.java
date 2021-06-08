@@ -37,13 +37,18 @@ public class SpreadSheetsServer {
 			System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.SpreadSheetsServer serverName");
 			return;
 		}
-		startServer(args,new MemoryStorage());
+		startServer(args,new MemoryStorage(),false);
 	}
-	public static void startServer(String[] args, StorageInterface storage) {
+	public static void startServer(String[] args, StorageInterface storage,boolean dropbox) {
 		try {
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		String domainName = args[0];
-		String secrete=args[1];
+		String secrete=null;
+		if(dropbox) {
+			secrete=args[2];
+		}else {
+			secrete=args[1];
+		}
 		if(secrete==null) {
 			Log.severe("SECRETE IS NULL");
 			return;

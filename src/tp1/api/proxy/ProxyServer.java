@@ -19,7 +19,7 @@ public class ProxyServer {
 	
 	public static void main(String[] args) {
 		boolean clean = Boolean.valueOf(args[1]);
-		SpreadSheetsServer.startServer(args,new DropBoxStorage(args[0],clean));
+		SpreadSheetsServer.startServer(args,new DropBoxStorage(args[0],clean),true);
 	}
 
 }
