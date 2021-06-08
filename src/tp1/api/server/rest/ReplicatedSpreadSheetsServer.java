@@ -38,7 +38,7 @@ public class ReplicatedSpreadSheetsServer {
 	public static Discovery martian=null;
 	
 	public static void main(String[] args) {
-		if(args.length!=1) {
+		if(args.length==0) {
 			System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.SpreadSheetsServer serverName");
 			return;
 		}
