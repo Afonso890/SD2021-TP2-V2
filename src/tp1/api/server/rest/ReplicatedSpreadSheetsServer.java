@@ -15,9 +15,9 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.api.discovery.Discovery;
-import tp1.api.replication.ReplicatedSheetsResources;
 import tp1.api.replication.VersionFilter;
 import tp1.api.replication.sync.SyncPoint;
+import tp1.api.servers.resources.ReplicatedSheetsResources;
 import tp1.api.service.rest.RestSpreadsheetsReplication;
 import tp1.api.storage.MemoryStorage;
 import tp1.util.InsecureHostnameVerifier;
