@@ -18,8 +18,8 @@ public class UsersWS implements SoapUsers {
 	private static Logger Log = Logger.getLogger(UsersWS.class.getName());
 	private final UsersResourcesSharedMethods resoures;
 
-	public UsersWS(String domainName, Discovery martian) {
-		resoures = new UsersResourcesSharedMethods(domainName, martian);
+	public UsersWS(String domainName, Discovery martian,String secrete) {
+		resoures = new UsersResourcesSharedMethods(domainName, martian,secrete);
 	}
 	@Override
 	public String createUser(User user) throws UsersException {	

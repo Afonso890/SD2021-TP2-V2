@@ -45,6 +45,11 @@ public class ReplicatedSpreadSheetsServer {
 		try {
 			String ip = InetAddress.getLocalHost().getHostAddress();
 			String domainName = args[0];
+			String secrete = args[1];
+			if(secrete==null) {
+				Log.severe("SECRETE IS NULL: REPLICATED SHEETS SERVER NOT STARTED!");
+				return;
+			}
 			//This allows client code executed by this server to ignore hostname verification
 			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 			/*
@@ -66,7 +71,7 @@ public class ReplicatedSpreadSheetsServer {
 			martian.start();
 			SyncPoint sync = SyncPoint.getInstance();
 			VersionFilter filter = new VersionFilter(sync);
-			RestSpreadsheetsReplication rest = new ReplicatedSheetsResources(domainName, martian, serverURI, new MemoryStorage(),sync);
+			RestSpreadsheetsReplication rest = new ReplicatedSheetsResources(domainName, martian, serverURI, new MemoryStorage(),sync,secrete);
 			config.register(rest);
 			config.register(filter);		
 

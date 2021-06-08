@@ -1,5 +1,6 @@
 package tp1.api.replication;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 
 
@@ -29,104 +30,145 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 	private static final long MINUS_ONE=-1L;
 	private static final int TRYOUT_TIMES=6;
 
-
 	private static final String KAFKA_HOSTS="localhost:9092, kafka:9092";
 	private SyncPoint sync;
 	//private KafkaOperationsHandler repManager;
 	private KafkaPublisher publisher;
 	private long operationSentOffset;
-	ReceiveOperationArgs args;
+	private int ids;
+	private StorageInterface spreadSheets;
 
-	public ReplicatedSheetsResources(String domainName, Discovery martian, String uri, StorageInterface spreadSheets, SyncPoint sync) {
-		super(domainName, martian, uri, spreadSheets);
+	public ReplicatedSheetsResources(String domainName, Discovery martian, String uri, StorageInterface spreadSheets, SyncPoint sync,String secrete) {
+		super(domainName, martian, uri, spreadSheets,secrete);
+		this.spreadSheets=spreadSheets;
 		//resource = new SpreadSheetsSharedMethods(domainName, martian, uri, spreadSheets);
 		publisher = KafkaPublisher.createPublisher(KAFKA_HOSTS);
 		//repManager=new KafkaOperationsHandler(domainName,resource,sync);
 		this.sync=sync;
 		operationSentOffset=MINUS_ONE;
-		args = new ReceiveOperationArgs(null,null);
+		this.ids=0;
 		receiver();
 		//System.out.println("****************************** REPLICA STARTED ++++++++++++++++++++++++++++++ "+martian.getId());
 	}
 	
 	@Override
 	public String createSpreadsheet(Long version, Spreadsheet sheet, String password) {
+		try {
+			passwordIsCorrect(sheet.getOwner(),password,Status.BAD_REQUEST);
+			validSheet(sheet);
+		}catch(Exception e) {
+			throw new WebApplicationException(Status.BAD_REQUEST);
+		}
 		CreateSpreadSheet create = new CreateSpreadSheet(sheet, password);
 		sender(ReceiveOperationArgs.CREATE_SPREADSHEET,Consts.json.toJson(create));
-		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
-			
-		if(res.getStatus()==Status.OK) {
-			return res.getObjResponse();
-		}
-		throw new WebApplicationException(res.getStatus());
+		String res = sync.waitForResult(versionToWaitFor(version));
+		return res;
 	}
 
 	@Override
 	public void deleteSpreadsheet(Long version, String sheetId, String password) {
-		DeletSpreadsheet delete = new DeletSpreadsheet(password, sheetId);
-		sender(ReceiveOperationArgs.DELETE_SPREADSHEET,Consts.json.toJson(delete));
-		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
-		if(res.getStatus()!=Status.OK) {
-			throw new WebApplicationException(res.getStatus());
+		synchronized (spreadSheets) {
+			Spreadsheet sp = hasSpreadSheet(sheetId);
+			passwordIsCorrect(sp.getOwner(),password,Status.FORBIDDEN);
 		}
+		
+		DeletSpreadsheet delete = new DeletSpreadsheet(sheetId);
+		sender(ReceiveOperationArgs.DELETE_SPREADSHEET,Consts.json.toJson(delete));
+		sync.waitForVersion(versionToWaitFor(version));
 	}
 
 	@Override
-	public void deleteSpreadsheet(Long version, String userId) {
-		DeleteUsersSheets delete = new DeleteUsersSheets(userId);
+	public void deleteSpreadsheetOfThisUser(Long version, String userId,String secrete) {
+		DeleteUsersSheets delete = new DeleteUsersSheets(userId,secrete);
 		sender(ReceiveOperationArgs.DELETE_USERS_SPREADSHEET,Consts.json.toJson(delete));
-		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
-		if(res.getStatus()!=Status.OK) {
-			throw new WebApplicationException(res.getStatus());
-		}
+		sync.waitForVersion(versionToWaitFor(version));
 	}
 
 	@Override
 	public void updateCell(Long version, String sheetId, String cell, String rawValue, String userId, String password) {
-		Update update = new Update(sheetId, cell, rawValue, userId, password);
-		sender(ReceiveOperationArgs.UPDATE_SPREADSHEET,Consts.json.toJson(update));
-		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
-		if(res.getStatus()!=Status.OK) {
-			throw new WebApplicationException(res.getStatus());
+		try{
+			System.out.println("GOING TO SEND AN UPDATE TO KAFKA");
+			Spreadsheet sp;
+			synchronized (spreadSheets) {
+				sp=hasSpreadSheet(sheetId);
+				if(!hasAccess(sp,userId)) {
+					throw new WebApplicationException(Status.FORBIDDEN);
+				}	
+			}
+			passwordIsCorrect(userId,password,Status.FORBIDDEN);
+			Update update = new Update(sp.getSheetId(),cell, rawValue);
+			sender(ReceiveOperationArgs.UPDATE_SPREADSHEET,Consts.json.toJson(update));
+			System.out.println("MESSAGE SENT TO KAFKA");
+			sync.waitForVersion(versionToWaitFor(version));
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
+		
 	}
 
 	@Override
 	public void shareSpreadsheet(Long version, String sheetId, String userId, String password) {
-		Share share = new Share(sheetId, userId, password);
-		sender(ReceiveOperationArgs.SHARE_SPREADSHEET,Consts.json.toJson(share));
-		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
-		if(res.getStatus()!=Status.OK) {
-			throw new WebApplicationException(res.getStatus());
+		userExists(userId);
+		Spreadsheet sp=null;
+		synchronized (spreadSheets) {
+			sp=hasSpreadSheet(sheetId);
+			passwordIsCorrect(sp.getOwner(),password,Status.FORBIDDEN);			
+			if(sp.getSharedWith()==null) {
+				sp.setSharedWith(new HashSet<String>());
+			}
+			if(sp.getSharedWith().contains(userId)) {
+				throw new WebApplicationException( Status.CONFLICT );
+			}
 		}
+		
+		Share share = new Share(sp.getSheetId(),userId);
+		sender(ReceiveOperationArgs.SHARE_SPREADSHEET,Consts.json.toJson(share));
+		sync.waitForVersion(versionToWaitFor(version));
 	}
 
 	@Override
 	public void unshareSpreadsheet(Long version, String sheetId, String userId, String password) {
-		Unshare unshare = new Unshare(sheetId, userId, password);
-		sender(ReceiveOperationArgs.UNSHARE_SPREADSHEET,Consts.json.toJson(unshare));
-		ReplicationSyncReturn res = sync.waitForResult(versionToWaitFor(version));
-		if(res.getStatus()!=Status.OK) {
-			throw new WebApplicationException(res.getStatus());
+		userId = userExists(userId);
+		Spreadsheet sp;
+		synchronized (spreadSheets) {
+			sp=hasSpreadSheet(sheetId);
+			passwordIsCorrect(sp.getOwner(),password,Status.FORBIDDEN);
+			if(!sp.getSharedWith().contains(userId+"@"+getDomain())) {
+				throw new WebApplicationException( Status.NOT_FOUND );
+			}
 		}
+		Unshare unshare = new Unshare(sheetId,userId+"@"+getDomain());
+		sender(ReceiveOperationArgs.UNSHARE_SPREADSHEET,Consts.json.toJson(unshare));
+		sync.waitForVersion(versionToWaitFor(version));
 	}
 	
 	@Override
 	public Spreadsheet getSpreadsheet(Long version, String sheetId,String userId,String password) {
+		if(version==null) {
+			version=sync.getVersionNumber();
+		}
 		sync.waitForVersion(version);
-		return super.getSpreadsheet(sheetId, userId, password);
+		System.out.println("PPPPPPPPPPPPPPPPPPPPPP "+version);
+		System.out.println("VERSION -------> "+sync.getVersionNumber());
+		return super.getSpreadsheet(sheetId,userId, password);
 	}
 		
 	@Override
 	public String[][] getSpreadsheetValues(Long version, String sheetId, String userId,String password){
+		if(version==null) {
+			version=sync.getVersionNumber();
+		}
 		sync.waitForVersion(version);
 		return super.getSpreadsheetValues(sheetId, userId, password);
 	}
 	
 	@Override
-	public SpreadsheetValuesWrapper importRange(Long version, String sheetId,String range,String email) {
+	public SpreadsheetValuesWrapper importRange(Long version, String sheetId,String range,String email,String secret) {
+		if(version==null) {
+			version=sync.getVersionNumber();
+		}
 		sync.waitForVersion(version);
-		return super.importRange(sheetId, range, email);
+		return super.importRange(sheetId, range, email,secret);
 	}
 	
 	private void receiver() {
@@ -152,7 +194,7 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
 				//System.out.println("Sequence Number: " + r.topic() + " , " +  r.offset() + " -> ");
-				ReplicationSyncReturn res=saveOperation(r.value());
+				String res=saveOperation(r.value());
 				sync.setResult(r.offset(),res);	
 			}
 		});
@@ -164,42 +206,58 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 			return Math.max(operationSentOffset, clientVersion);
 		}
 	}
-	private ReplicationSyncReturn saveOperation(String value){
+	private String saveOperation(String value){
 		ReceiveOperationArgs args;
 		args =	Consts.json.fromJson(value,ReceiveOperationArgs.class);
 		value=args.getArgs();
-		ReplicationSyncReturn result=new ReplicationSyncReturn();
+		String result = null;
 		try {
 			if(ReceiveOperationArgs.CREATE_SPREADSHEET.equals(args.getOperation())) {
 				CreateSpreadSheet cs = Consts.json.fromJson(value,CreateSpreadSheet.class);
-				result.setObjResponse(super.createSpreadsheet(cs.getSheet(),cs.getPassword()));
+				synchronized (spreadSheets) {
+					ids++;
+					Spreadsheet sheet = cs.getSheet();
+					//UUID.randomUUID().toString();
+					String sheetId = ids+"$"+sheet.getOwner();
+					sheet.setSheetId(sheetId);
+					sheet.setSheetURL(getUri()+"_"+sheet.getSheetId());
+					spreadSheets.put(sheet.getSheetId(),sheet);
+					result=sheetId;
+				}
 			}else if(ReceiveOperationArgs.DELETE_SPREADSHEET.equals(args.getOperation())) {
 				DeletSpreadsheet cs = Consts.json.fromJson(value,DeletSpreadsheet.class);
-				super.deleteSpreadsheet(cs.getSheetid(),cs.getPassword());
+				synchronized (spreadSheets) {
+					spreadSheets.remove(cs.getSheetid());
+				}
 			}else if(ReceiveOperationArgs.DELETE_USERS_SPREADSHEET.equals(args.getOperation())) {
 				DeleteUsersSheets cs = Consts.json.fromJson(value,DeleteUsersSheets.class);
-				super.deleteSpreadsheet(cs.getUserId());
+				super.deleteSpreadsheetOfThisUSer(cs.getUserId(),cs.getSecrete());
 			}else if(ReceiveOperationArgs.SHARE_SPREADSHEET.equals(args.getOperation())) {
 				Share cs = Consts.json.fromJson(value,Share.class);
-				super.shareSpreadsheet(cs.getSheetId(), cs.getUserId(), cs.getPassword());
+				synchronized (spreadSheets) {
+					spreadSheets.share(spreadSheets.get(cs.getSheetid()),cs.getUserId());
+				}
 			}else if(ReceiveOperationArgs.UNSHARE_SPREADSHEET.equals(args.getOperation())) {
 				Unshare cs = Consts.json.fromJson(value,Unshare.class);
-				super.unshareSpreadsheet(cs.getSheetId(), cs.getUserId(), cs.getPassword());
+				synchronized (spreadSheets) {
+					spreadSheets.unShare(spreadSheets.get(cs.getSheetId()),cs.getUserId());
+				}
 			}else if(ReceiveOperationArgs.UPDATE_SPREADSHEET.equals(args.getOperation())) {
+				System.out.println("GOING TO ADD UPDATE");
 				Update cs = Consts.json.fromJson(value,Update.class);
-				super.updateCell(cs.getSheetId(), cs.getCell(),cs.getRawValue(), cs.getUserId(), cs.getPassword());
+				synchronized (spreadSheets) {
+					Spreadsheet sp = spreadSheets.get(cs.getSheetId());
+					spreadSheets.updateCell(sp,cs.getCell(),cs.getRawValue());
+					//spreadSheets.put(cs.getSheet().getSheetId(),cs.getSheet());
+				}			
 			}
-			result.setStatus(Status.OK);
-		}catch(WebApplicationException e) {
-			result.setStatus(e.getResponse().getStatusInfo().toEnum());
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
 	private void sender(String operation, String value) {
-		args.setOperation(operation);
-		args.setArgs(value);
+		ReceiveOperationArgs args = new ReceiveOperationArgs(operation, value);
 		long sequenceNumber = publisher.publish(getDomain(),Consts.json.toJson(args));
 		if(sequenceNumber >= 0) {
 			System.out.println("Message published with sequence number: " + sequenceNumber);

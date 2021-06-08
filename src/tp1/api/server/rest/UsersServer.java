@@ -28,14 +28,15 @@ public class UsersServer {
 	
 	public static void main(String[] args) {
 		try {
-			
-			if(args.length!=1) {
-				System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.UsersServer domainName");
+			if(args.length==0) {
+				System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.UsersServer domainName"+ " secreto "+args[1]);
 				return;
 			}
 		String domainName = args[0];
-
-
+		String secrete = args[1];
+		if(secrete==null) {
+			Log.severe("SECRETE CANNOT BE NULL!");
+		}
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		/*
 		 * Multiple resources (i.e., services) can be
@@ -49,7 +50,7 @@ public class UsersServer {
 		ResourceConfig config = new ResourceConfig();
 		Discovery d = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 		d.start();
-		config.register(new UsersResource(domainName,d));
+		config.register(new UsersResource(domainName,d,secrete));
 
 		/*
 		 * This defines the server URL. If the
@@ -70,6 +71,7 @@ public class UsersServer {
 		//More code can be executed here...
 		} catch( Exception e) {
 			Log.severe(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	

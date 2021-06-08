@@ -34,7 +34,7 @@ public class ImportRange {
 	private static String apiKey ="AIzaSyBlavaHw1h9Th_RouiUa70iMWAhB18oizk";
 	private static String GOOGLE_IMPORT_RANGE_TAG="google";
 		
-	public static String [][] importRange(String url, String range, String email,Client client) {
+	public static String [][] importRange(String url, String range, String email,Client client,String secreto) {
 		
 		String sheetId;
 		String urls [];
@@ -56,7 +56,7 @@ public class ImportRange {
 		urls=url.split("/");
 
 		if(Discovery.SOAP.equals(urls[urls.length-1])) {
-			return importRangeSoap(url,range, sheetId, email);
+			return importRangeSoap(url,range, sheetId, email,secreto);
 		}
 		WebTarget target = client.target(url).path(RestSpreadsheets.PATH);
 
@@ -66,7 +66,7 @@ public class ImportRange {
 		while(!success && retries <Consts.MAX_RETRIES) {
 			try {
 				//queryParam("password", password)
-				Response r = target.path(sheetId).path(range).path(email)
+				Response r = target.path(sheetId).path(range).path(email).queryParam("secreto",secreto)
 						.request()
 						.accept(MediaType.APPLICATION_JSON)
 						.get();
@@ -91,7 +91,7 @@ public class ImportRange {
 		}
 		return cache.getValuesInFailure(sheetId,range);
 	}
-	private static String [][] importRangeSoap(String url, String range, String sheetId,String email){
+	private static String [][] importRangeSoap(String url, String range, String sheetId,String email,String secreto){
 		//Obtaining s stub for the remote soap service
 				SoapSpreadsheets sheets = null;
 				HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
@@ -119,7 +119,7 @@ public class ImportRange {
 				while(!success && retries <Consts.MAX_RETRIES) {
 					try {
 						SpreadsheetValuesWrapper result;
-						result = sheets.importRange(sheetId,range,email);
+						result = sheets.importRange(sheetId,range,email,secreto);
 						cache.addValues(result.getValues(),sheetId,result.getServer_tw());
 						success = true;
 						return cache.extractValues(result.getValues(),range);	

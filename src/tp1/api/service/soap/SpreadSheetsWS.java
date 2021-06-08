@@ -13,8 +13,8 @@ public class SpreadSheetsWS implements SoapSpreadsheets{
 	
 	private final SpreadSheetsSharedMethods resource;
 
-	public SpreadSheetsWS(String domainName, Discovery martian, String uri, StorageInterface spreadSheets) {
-		resource = new SpreadSheetsSharedMethods(domainName, martian, uri,spreadSheets);
+	public SpreadSheetsWS(String domainName, Discovery martian, String uri, StorageInterface spreadSheets,String secret) {
+		resource = new SpreadSheetsSharedMethods(domainName, martian, uri,spreadSheets,secret);
 	}
 	@Override
 	public String createSpreadsheet(Spreadsheet sheet, String password) throws SheetsException {
@@ -80,16 +80,16 @@ public class SpreadSheetsWS implements SoapSpreadsheets{
 		}
 	}
 	@Override
-	public SpreadsheetValuesWrapper importRange(String sheetId, String range,String email) throws SheetsException {
+	public SpreadsheetValuesWrapper importRange(String sheetId, String range,String email,String secret) throws SheetsException {
 		try{
-			return resource.importRange(sheetId,range,email);
+			return resource.importRange(sheetId,range,email,secret);
 		}catch(Exception e) {
 			throw new SheetsException(e.getLocalizedMessage());
 		}
 	}
 	@Override
-	public void deleteSpreadsheet2(String userId) throws SheetsException {
-		resource.deleteSpreadsheet(userId);
+	public void deleteSpreadsheet2(String userId,String secret) throws SheetsException {
+		resource.deleteSpreadsheetOfThisUSer(userId,secret);
 	}
 
 }

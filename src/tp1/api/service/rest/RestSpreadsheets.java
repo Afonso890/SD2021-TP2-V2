@@ -60,7 +60,7 @@ public interface RestSpreadsheets {
 	 */
 	@DELETE
 	@Path("removeSheets/{userId}")
-	void deleteSpreadsheet(@PathParam("userId") String userId);
+	void deleteSpreadsheetOfThisUser(@PathParam("userId") String userId,@QueryParam("secrete") String secrete);
 	
 	/**
 	 * Retrieve a spreadsheet.
@@ -108,7 +108,8 @@ public interface RestSpreadsheets {
 	@GET
 	@Path("/{sheetId}/{range}/{email}")
 	@Produces(MediaType.APPLICATION_JSON)
-	SpreadsheetValuesWrapper importRange(@PathParam("sheetId") String sheetId, @PathParam("range") String range,@PathParam("email") String email);
+	SpreadsheetValuesWrapper importRange(@PathParam("sheetId") String sheetId, 
+			@PathParam("range") String range,@PathParam("email") String email,@QueryParam("secreto") String secreto);
 	
 
 	/**

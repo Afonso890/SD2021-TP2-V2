@@ -18,10 +18,12 @@ public class UsersResourcesSharedMethods {
 	private String spreadServiceId;
 
 	public final Discovery martian;
+	private String secrete;
 	
-	public UsersResourcesSharedMethods(String domainName, Discovery martian) {
+	public UsersResourcesSharedMethods(String domainName, Discovery martian,String secrt) {
 		users = new HashMap<String, User>();
 		this.martian=martian;
+		this.secrete=secrt;
 		spreadServiceId =domainName+":"+SpreadSheetsServer.SERVICE;
 	}
 
@@ -111,7 +113,7 @@ public class UsersResourcesSharedMethods {
 			
 			if(users.remove(userId)!=null) {
 				//TO-DO-LATER:THINK ABOUT USING THREAD POOLS
-				DeleteSpreadSheetWorker theDeleter = new DeleteSpreadSheetWorker(userId,spreadServiceId,martian);
+				DeleteSpreadSheetWorker theDeleter = new DeleteSpreadSheetWorker(userId,spreadServiceId,martian,secrete);
 				theDeleter.start();
 			}
 			

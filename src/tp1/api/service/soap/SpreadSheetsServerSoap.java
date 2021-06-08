@@ -48,9 +48,14 @@ public class SpreadSheetsServerSoap {
 			server.setHttpsConfigurator(configurator);
 			server.setExecutor(Executors.newCachedThreadPool());
 			String domainName=args[0];
+			String secrete = args[1];
+			if(secrete==null) {
+				Log.severe("SECRETE IS NULLL");
+				return;
+			}
 			Discovery martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 			martian.start();
-			Endpoint soapUsersEndpoint = Endpoint.create(new SpreadSheetsWS(domainName,martian,serverURI,new MemoryStorage()));
+			Endpoint soapUsersEndpoint = Endpoint.create(new SpreadSheetsWS(domainName,martian,serverURI,new MemoryStorage(),secrete));
 			
 			soapUsersEndpoint.publish(server.createContext(SOAP_SHEETS_PATH));
 			

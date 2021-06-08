@@ -1,29 +1,28 @@
 package tp1.api.replication.args;
 
 public class Share {
-	private String sheetId, userId, password;
-	public String getSheetId() {
-		return sheetId;
+	private String sheetid;
+	private String userId;
+
+	public Share(String sheet, String userId) {
+		setSheetid(sheet);
+		setUserId(userId);
 	}
-	public void setSheetId(String sheetId) {
-		this.sheetId = sheetId;
+
+	public String getSheetid() {
+		return sheetid;
 	}
+
+	public void setSheetid(String sheetid) {
+		this.sheetid = sheetid;
+	}
+
 	public String getUserId() {
 		return userId;
 	}
+
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	public Share(String sheetId, String userId, String password) {
-		setSheetId(sheetId);
-		setUserId(userId);
-		setPassword(password);
 	}
 
 }
