@@ -33,7 +33,8 @@ static final String PATH="/spreadsheets";
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	String createSpreadsheet(@HeaderParam(RestSpreadsheetsReplication.HEADER_VERSION) Long version, Spreadsheet sheet, @QueryParam("password") String password);
+	String createSpreadsheet(@HeaderParam(RestSpreadsheetsReplication.HEADER_VERSION) Long version, Spreadsheet sheet, 
+			@QueryParam("password") String password);
 
 	
 	/**
@@ -62,7 +63,7 @@ static final String PATH="/spreadsheets";
 	 */
 	@DELETE
 	@Path("removeSheets/{userId}")
-	void deleteSpreadsheet(@HeaderParam(RestSpreadsheetsReplication.HEADER_VERSION) Long version, @PathParam("userId") String userId);
+	void deleteSpreadsheetOfThisUser(@HeaderParam(RestSpreadsheetsReplication.HEADER_VERSION) Long version, @PathParam("userId") String userId,@QueryParam("secrete") String secrete);
 	
 	/**
 	 * Retrieve a spreadsheet.
@@ -110,7 +111,8 @@ static final String PATH="/spreadsheets";
 	@GET
 	@Path("/{sheetId}/{range}/{email}")
 	@Produces(MediaType.APPLICATION_JSON)
-	SpreadsheetValuesWrapper importRange(@HeaderParam(RestSpreadsheetsReplication.HEADER_VERSION) Long version, @PathParam("sheetId") String sheetId, @PathParam("range") String range,@PathParam("email") String email);
+	SpreadsheetValuesWrapper importRange(@HeaderParam(RestSpreadsheetsReplication.HEADER_VERSION) Long version, @PathParam("sheetId")
+	String sheetId, @PathParam("range") String range,@PathParam("email") String email,@QueryParam("secreto") String secreto);
 	
 
 	/**

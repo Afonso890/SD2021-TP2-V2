@@ -8,7 +8,7 @@ import tp1.api.spreadsheet.clients.ImportRange;
 public class GetAbstractSpreadSheet {
 
 	
-	public static AbstractSpreadsheet getTheOne(Spreadsheet sp, String domain, Client client) {
+	public static AbstractSpreadsheet getTheOne(Spreadsheet sp, String domain, Client client,String secreto) {
 		return  new AbstractSpreadsheet() {
 			
 			@Override
@@ -23,8 +23,7 @@ public class GetAbstractSpreadSheet {
 			
 			@Override
 			public String[][] getRangeValues(String sheetURL, String range) {
-				
-				return ImportRange.importRange(sheetURL,range,sp.getOwner()+"@"+domain,client);
+				return ImportRange.importRange(sheetURL,range,sp.getOwner()+"@"+domain,client,secreto);
 			}
 			
 			@Override

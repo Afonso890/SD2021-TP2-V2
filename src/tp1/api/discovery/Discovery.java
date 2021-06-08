@@ -141,7 +141,7 @@ public class Discovery {
 										wp.addUriString(msgElems[ONE]);
 									}
 								}
-								removeLastKnownService();
+								//removeLastKnownService();
 							}
 						}
 					} catch (IOException e) {
@@ -151,10 +151,11 @@ public class Discovery {
 			}).start();
 			
 			/*periodically removes the uris from terminated servers*/
+			
 			new Thread(() -> {
 				for (;;) {
 					try {
-						Thread.sleep(DISCOVERY_PERIOD);
+						Thread.sleep(DISCOVERY_TIMEOUT);
 						removeLastKnownService();
 					} catch (Exception e) {}
 				}
@@ -183,7 +184,7 @@ public class Discovery {
 		}
 	}
 	public boolean hasThisDomain(String serviceArg) {
-		synchronized (serviceArg) {
+		synchronized (services) {
 			return services.containsKey(serviceArg);
 		}
 	}

@@ -50,9 +50,14 @@ public class UsersServerSoap {
 			server.setHttpsConfigurator(configurator);
 			server.setExecutor(Executors.newCachedThreadPool());
 			String domainName=args[0];
+			String secrete = args[1];
+			if(secrete==null) {
+				Log.severe("SECRETE IS NULL");
+				return;
+			}
 			Discovery d = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 			d.start();
-			Endpoint soapUsersEndpoint = Endpoint.create(new UsersWS(domainName,d));
+			Endpoint soapUsersEndpoint = Endpoint.create(new UsersWS(domainName,d,secrete));
 			
 			soapUsersEndpoint.publish(server.createContext(SOAP_USERS_PATH));
 			

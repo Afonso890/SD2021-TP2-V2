@@ -42,7 +42,7 @@ public class MemoryStorage implements StorageInterface {
 
 	@Override
 	public void updateCell(Spreadsheet sp, String cell, String rawValue) {
-		sp.setCellRawValue(cell, rawValue);		
+		sp.setCellRawValue(cell,rawValue);		
 	}
 
 	@Override

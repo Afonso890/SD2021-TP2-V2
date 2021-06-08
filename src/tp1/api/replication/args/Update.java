@@ -3,28 +3,35 @@ package tp1.api.replication.args;
 public class Update {
 
 	private String sheetId;
-	private String cell;
+	private String cel;
 	private String rawValue;
-	private String userId;
-	private String password;
-	public Update(String sheetId, String cell, String rawValue, String userId, String password) {
-		setSheetId(sheetId);
+	public Update(String sheetid, String cell, String rawValue) {
+		setSheetId(sheetid);
 		setCell(cell);
 		setRawValue(rawValue);
-		setUserId(userId);
-		setPassword(password);
 	}
+
 	public String getSheetId() {
 		return sheetId;
 	}
+
 	public void setSheetId(String sheetId) {
 		this.sheetId = sheetId;
 	}
+
+	public String getCel() {
+		return cel;
+	}
+
+	public void setCel(String cel) {
+		this.cel = cel;
+	}
+
 	public String getCell() {
-		return cell;
+		return cel;
 	}
 	public void setCell(String cell) {
-		this.cell = cell;
+		this.cel = cell;
 	}
 	public String getRawValue() {
 		return rawValue;
@@ -32,17 +39,4 @@ public class Update {
 	public void setRawValue(String rawValue) {
 		this.rawValue = rawValue;
 	}
-	public String getUserId() {
-		return userId;
-	}
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 }

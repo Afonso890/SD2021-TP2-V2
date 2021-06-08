@@ -3,6 +3,7 @@ package tp1.api.server.rest;
 import java.io.File;
 import java.net.InetAddress;
 
+
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -13,7 +14,6 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.api.discovery.Discovery;
-import tp1.api.replication.sync.SyncPoint;
 import tp1.api.servers.resources.SpreadSheetResource;
 import tp1.api.storage.MemoryStorage;
 import tp1.api.storage.StorageInterface;
@@ -34,16 +34,26 @@ public class SpreadSheetsServer {
 	public static Discovery martian=null;
 	
 	public static void main(String[] args) {
-		if(args.length!=1) {
+		if(args.length==0) {
 			System.err.println( "Use: java -cp /home/sd/sd2021.jar sd2021.aula2.server.SpreadSheetsServer serverName");
 			return;
 		}
-		startServer(args,new MemoryStorage());
+		startServer(args,new MemoryStorage(),false);
 	}
-	public static void startServer(String[] args, StorageInterface storage) {
+	public static void startServer(String[] args, StorageInterface storage,boolean dropbox) {
 		try {
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		String domainName = args[0];
+		String secrete=null;
+		if(dropbox) {
+			secrete=args[2];
+		}else {
+			secrete=args[1];
+		}
+		if(secrete==null) {
+			Log.severe("SECRETE IS NULL");
+			return;
+		}
 		//This allows client code executed by this server to ignore hostname verification
 		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 		/*
@@ -64,7 +74,7 @@ public class SpreadSheetsServer {
 		martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 		martian.start();
 		System.out.println("ARGS DO PROXY");
-		config.register(new SpreadSheetResource(domainName,martian,serverURI, storage));		
+		config.register(new SpreadSheetResource(domainName,martian,serverURI, storage,secrete));		
 		/*
 		 * This effectively starts the server (with
 			their own threads to handle client

@@ -37,7 +37,7 @@ public interface SoapSpreadsheets{
 	 * @param userId
 	 * @throws SheetsException 
 	 */
-	void deleteSpreadsheet2(String userId) throws SheetsException;
+	void deleteSpreadsheet2(String userId,String secrete) throws SheetsException;
 	/**
 	 * Retrieve a spreadsheet.
 	 * 	
@@ -99,5 +99,5 @@ public interface SoapSpreadsheets{
 	 */
 	String[][] getSpreadsheetValues(String sheetId, String userId, String password) throws SheetsException;
 	
-	SpreadsheetValuesWrapper importRange(String sheetId, String range,String email) throws SheetsException;
+	SpreadsheetValuesWrapper importRange(String sheetId, String range,String email,String secreto) throws SheetsException;
 }

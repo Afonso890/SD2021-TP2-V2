@@ -20,7 +20,7 @@ import tp1.api.service.soap.SoapSpreadsheets;
 
 public class DeleteSpreadSheetClient {
 	
-	public static void deleteSingUserSpreadSheets(String userId, String serverUrl) {
+	public static void deleteSingUserSpreadSheets(String userId, String serverUrl,String secrete) {
 		/*
 		ClientConfig config = new ClientConfig();
 		//how much time until we timeout when opening the TCP connection to the server
@@ -37,7 +37,7 @@ public class DeleteSpreadSheetClient {
 		while(!success && retries < Consts.MAX_RETRIES) {
 			try {
 				//queryParam("password", password)
-				Response r = target.path("removeSheets/"+userId)
+				Response r = target.path("removeSheets/"+userId).queryParam("secrete",secrete)
 						.request()
 						.accept(MediaType.APPLICATION_JSON)
 						.delete();
@@ -57,7 +57,7 @@ public class DeleteSpreadSheetClient {
 			}
 		}
 	}
-	public static void soapDeleteSingUserSpreadSheets(String userId, String serverUrl) {
+	public static void soapDeleteSingUserSpreadSheets(String userId, String serverUrl,String secrete) {
 			
 		SoapSpreadsheets sheets = null;
 		try {
@@ -84,7 +84,7 @@ public class DeleteSpreadSheetClient {
 
 		while(!success && retries <Consts.MAX_RETRIES) {
 			try {
-				sheets.deleteSpreadsheet2(userId);
+				sheets.deleteSpreadsheet2(userId,secrete);
 				success = true;
 			}catch (tp1.api.service.soap.SheetsException e) {
 				System.out.println("Cound not delete the sheets of user "+userId+", -->" + e.getMessage());

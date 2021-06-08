@@ -2,11 +2,10 @@ package tp1.api.replication.sync;
 
 import java.util.HashMap;
 
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import tp1.api.replication.ReplicationSyncReturn;
 import tp1.api.replication.VersionNumber;
 
 public class SyncPoint implements VersionNumber
@@ -21,12 +20,12 @@ public class SyncPoint implements VersionNumber
 		return instance;
 	}
 
-	private Map<Long,ReplicationSyncReturn> result;
+	private Map<Long,String> result;
 	private long version;
 	
 	
 	private SyncPoint() {
-		result = new HashMap<Long,ReplicationSyncReturn>();
+		result = new HashMap<Long,String>();
 		version=-1L;
 		removeDoCleabUp();
 	}
@@ -43,11 +42,12 @@ public class SyncPoint implements VersionNumber
 				// do nothing
 			}
 		}
+		result.remove(n);
 	}
 	/**
 	 * Assuming that results are added sequentially, returns null if the result is not available.
 	 */
-	public synchronized ReplicationSyncReturn waitForResult( long n) {
+	public synchronized String waitForResult( long n) {
 		while( version < n) {
 			try {
 				wait();
@@ -61,7 +61,7 @@ public class SyncPoint implements VersionNumber
 	/**
 	 * Updates the version and stores the associated result
 	 */
-	public synchronized void setResult( long n, ReplicationSyncReturn res) {
+	public synchronized void setResult( long n, String res) {
 		if( res != null)
 			result.put(n,res);
 		version = n;
@@ -79,7 +79,7 @@ public class SyncPoint implements VersionNumber
 	 * Cleans up results that will not be consumed
 	 */
 	public synchronized void cleanupUntil( long n) {
-		Iterator<Entry<Long,ReplicationSyncReturn>> it = result.entrySet().iterator();
+		Iterator<Entry<Long,String>> it = result.entrySet().iterator();
 		while( it.hasNext()) {
 			if( it.next().getKey() < n)
 				it.remove();

@@ -26,8 +26,9 @@ public class SpreadSheetsSharedMethods {
 	private int ids;
 	private String uri;
 	private String users_domain;
+	private String secrete;
 
-	public SpreadSheetsSharedMethods(String domainName, Discovery martian, String uri, StorageInterface spreadSheets) {
+	public SpreadSheetsSharedMethods(String domainName, Discovery martian, String uri, StorageInterface spreadSheets,String secret) {
 		this.domainName=domainName;
 		this.client = Consts.client;
 		this.spreadSheets=spreadSheets;
@@ -35,6 +36,10 @@ public class SpreadSheetsSharedMethods {
 		this.uri=uri;
 		users_domain=domainName+":"+UsersServer.SERVICE;
 		ids=0;
+		this.secrete=secret;
+	}
+	private boolean validSecrete(String sec) {
+		return secrete.equals(sec);
 	}
 	/**
 	 * 
@@ -46,13 +51,16 @@ public class SpreadSheetsSharedMethods {
 	public Discovery getDiscovery() {
 		return martian;
 	}
+	public String getUri() {
+		return uri;
+	}
 	/**
 	 * makes a request to the users server to verify the user
 	 * @param owner
 	 * @param password
 	 * @param s
 	 */
-	private void passwordIsCorrect(String owner, String password, Status s) {
+	public void passwordIsCorrect(String owner, String password, Status s) {
 		try {
 			if(password==null||"".equals(password.trim())) {
 				throw new WebApplicationException(s);
@@ -70,7 +78,7 @@ public class SpreadSheetsSharedMethods {
 	 * @param userId -> user email
 	 * @return
 	 */
-	private String userExists(String useremail) {	
+	public String userExists(String useremail) {	
 		String [] parms = useremail.split("@");
 		useremail = parms[0];
 		if(parms.length!=2) {
@@ -95,14 +103,14 @@ public class SpreadSheetsSharedMethods {
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 	}
-	private Spreadsheet hasSpreadSheet(String spreadid) {
+	public Spreadsheet hasSpreadSheet(String spreadid) {
 		Spreadsheet sp = spreadSheets.get(spreadid);
 		if(sp==null) {
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 		return sp;
 	}
-	private void validSheet(Spreadsheet sheet) {
+	public void validSheet(Spreadsheet sheet) {
 		if(sheet.getSheetId()!=null || sheet.getColumns()<=Consts.ZERO || sheet.getRows()<=Consts.ZERO) {
 			throw new WebApplicationException( Status.CONFLICT );
 		}
@@ -114,8 +122,8 @@ public class SpreadSheetsSharedMethods {
 	public String createSpreadsheet(Spreadsheet sheet, String password) {
 		passwordIsCorrect(sheet.getOwner(),password,Status.BAD_REQUEST);
 		try {
+			validSheet(sheet);
 			synchronized (this) {
-				validSheet(sheet);
 				ids++;
 				//UUID.randomUUID().toString();
 				String sheetId = ids+"$"+sheet.getOwner();
@@ -129,7 +137,6 @@ public class SpreadSheetsSharedMethods {
 		return sheet.getSheetId();
 	}
 
-	
 	public void deleteSpreadsheet(String sheetId, String password) {
 		synchronized (this) {
 			Spreadsheet sp = hasSpreadSheet(sheetId);
@@ -137,7 +144,7 @@ public class SpreadSheetsSharedMethods {
 			sp = spreadSheets.remove(sheetId);
 		}
 	}
-	private boolean hasAccess(Spreadsheet sp, String userId) {
+	public boolean hasAccess(Spreadsheet sp, String userId) {
 		if(sp.getOwner().equalsIgnoreCase(userId)) {
 			return true;
 		}
@@ -157,7 +164,6 @@ public class SpreadSheetsSharedMethods {
 			}
 			//passwordIsCorrect(userId,password,Status.FORBIDDEN);
 		}
-		
 		return sp;
 	}
 	public String[][] getSpreadsheetValues(String sheetId, String userId, String password) {
@@ -168,7 +174,7 @@ public class SpreadSheetsSharedMethods {
 		passwordIsCorrect(userId,password,Status.FORBIDDEN);
 		String [][] values=null;
 		try {
-			values=SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(GetAbstractSpreadSheet.getTheOne(sp,domainName,client));
+			values=SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(GetAbstractSpreadSheet.getTheOne(sp,domainName,client,secrete));
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -176,7 +182,10 @@ public class SpreadSheetsSharedMethods {
 	}
 	//import range
 	
-	public SpreadsheetValuesWrapper importRange(String sheetId,String range,String email) {
+	public SpreadsheetValuesWrapper importRange(String sheetId,String range,String email,String secret) {
+		if(!validSecrete(secret)) {
+			throw new WebApplicationException(Status.FORBIDDEN);
+		}
 		SpreadsheetWrapper spw = spreadSheets.getSpreadsheet(sheetId);
 		if(spw==null) {
 			throw new WebApplicationException( Status.NOT_FOUND );
@@ -185,7 +194,7 @@ public class SpreadSheetsSharedMethods {
 		String [][] values;
 		String userId = email.split("@")[0];
 		if(sp.getOwner().equals(userId)||sp.getSharedWith().contains(email)){
-			values=SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(GetAbstractSpreadSheet.getTheOne(sp,domainName,client));
+			values=SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(GetAbstractSpreadSheet.getTheOne(sp,domainName,client,secret));
 			return new  SpreadsheetValuesWrapper(values,spw.getTw_server());
 		}else {
 			throw new WebApplicationException(Status.FORBIDDEN);
@@ -233,7 +242,12 @@ public class SpreadSheetsSharedMethods {
 	 * 
 	 * @param userId
 	 */
-	public void deleteSpreadsheet(String userId) {
+	public void deleteSpreadsheetOfThisUSer(String userId,String secret) {
+		if(!validSecrete(secret)) {
+			System.out.println(this.secrete+"----------------- "+secret);
+			System.err.println("SECRETE IS WRONG!");
+			throw new WebApplicationException(Status.FORBIDDEN);
+		}
 		synchronized (spreadSheets) {
 			spreadSheets.deleteSheetsOfThisUser(userId);
 		}		

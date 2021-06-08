@@ -23,8 +23,8 @@ public class SpreadSheetResource implements RestSpreadsheets{
 	//private static Logger Log = Logger.getLogger(SpreadSheetResource.class.getName());
 
 	private final SpreadSheetsSharedMethods resource;
-	public SpreadSheetResource(String domainName, Discovery martian,String uri, StorageInterface spreadSheets) {
-		resource = new SpreadSheetsSharedMethods(domainName, martian, uri, spreadSheets);
+	public SpreadSheetResource(String domainName, Discovery martian,String uri, StorageInterface spreadSheets,String secrete) {
+		resource = new SpreadSheetsSharedMethods(domainName, martian, uri, spreadSheets,secrete);
 	}
 	public String getDomain() {
 		return resource.getDomain();
@@ -55,8 +55,8 @@ public class SpreadSheetResource implements RestSpreadsheets{
 	}
 	//import range
 	@Override
-	public SpreadsheetValuesWrapper importRange(String sheetId, String range,String email) {
-		return resource.importRange(sheetId,range,email);
+	public SpreadsheetValuesWrapper importRange(String sheetId, String range,String email,String secret) {
+		return resource.importRange(sheetId,range,email,secret);
 	}
 
 	@Override
@@ -74,9 +74,9 @@ public class SpreadSheetResource implements RestSpreadsheets{
 		resource.unshareSpreadsheet(sheetId, userId, password);
 	}
 	@Override
-	public void deleteSpreadsheet(String userId) {
-		resource.deleteSpreadsheet(userId);
+	public void deleteSpreadsheetOfThisUser(String userId, String secrete) {
+		resource.deleteSpreadsheetOfThisUSer(userId, secrete);
 	}
-	
+		
 
 }

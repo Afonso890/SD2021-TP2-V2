@@ -9,8 +9,8 @@ import tp1.api.service.rest.RestUsers;
 @Singleton
 public class UsersResource implements RestUsers {
 	private final UsersResourcesSharedMethods resourceAux;
-	public UsersResource(String domainName, Discovery martian) {
-		resourceAux = new UsersResourcesSharedMethods(domainName, martian);
+	public UsersResource(String domainName, Discovery martian, String secrete) {
+		resourceAux = new UsersResourcesSharedMethods(domainName, martian,secrete);
 	}
 
 	@Override

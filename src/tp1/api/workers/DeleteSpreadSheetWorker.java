@@ -11,10 +11,12 @@ public class DeleteSpreadSheetWorker extends Thread {
 	private Discovery martian;
 	private String spreadServiceId;
 	private String userid;
-	public DeleteSpreadSheetWorker (String userid,String spreadServiceId,Discovery martian) {
+	private String secrete;
+	public DeleteSpreadSheetWorker (String userid,String spreadServiceId,Discovery martian,String secret) {
 		this.martian=martian;
 		this.userid=userid;
 		this.spreadServiceId=spreadServiceId;
+		this.secrete=secret;
 	}
 
 	@Override
@@ -30,9 +32,9 @@ public class DeleteSpreadSheetWorker extends Thread {
 		uris = uri.split("/");
 		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 		if(Discovery.SOAP.equalsIgnoreCase(uris[uris.length-1])) {
-			DeleteSpreadSheetClient.soapDeleteSingUserSpreadSheets(userid,uri);
+			DeleteSpreadSheetClient.soapDeleteSingUserSpreadSheets(userid,uri,secrete);
 		}else {
-			DeleteSpreadSheetClient.deleteSingUserSpreadSheets(userid,uri);
+			DeleteSpreadSheetClient.deleteSingUserSpreadSheets(userid,uri,secrete);
 		}
 	}
 
