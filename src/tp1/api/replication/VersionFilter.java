@@ -9,19 +9,18 @@ import tp1.api.service.rest.RestSpreadsheetsReplication;
 
 public class VersionFilter implements ContainerResponseFilter {
 
-	KafkaOperationsHandler repManager;
-
-    public VersionFilter( KafkaOperationsHandler repManager) {
-        this.repManager = repManager;
-    }
+	private VersionNumber versionNumber;
 	public VersionFilter() {
 		// TODO Auto-generated constructor stub
 	}
+	public VersionFilter(VersionNumber v) {
+		versionNumber=v;
+	}
 
-	 @Override
-	    public void filter(ContainerRequestContext request, ContainerResponseContext response) 
-	                throws IOException {
-	    	response.getHeaders().add(RestSpreadsheetsReplication.HEADER_VERSION, repManager.getVersionNumber());
-	    }
+	@Override
+	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
+			throws IOException {
+		responseContext.getHeaders().add(RestSpreadsheetsReplication.HEADER_VERSION,versionNumber.getVersionNumber());
+	}
 
 }

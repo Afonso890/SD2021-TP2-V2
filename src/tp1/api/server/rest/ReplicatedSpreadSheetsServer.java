@@ -4,6 +4,7 @@ import java.net.InetAddress;
 
 
 
+
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -15,8 +16,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.api.discovery.Discovery;
 import tp1.api.replication.ReplicatedSheetsResources;
+import tp1.api.replication.VersionFilter;
 import tp1.api.replication.sync.SyncPoint;
-import tp1.api.service.rest.RestSpreadsheets;
+import tp1.api.service.rest.RestSpreadsheetsReplication;
 import tp1.api.storage.MemoryStorage;
 import tp1.util.InsecureHostnameVerifier;
 
@@ -62,8 +64,12 @@ public class ReplicatedSpreadSheetsServer {
 			
 			martian = Discovery.getDiscovery(SERVICE,serverURI,domainName);
 			martian.start();
-			RestSpreadsheets rest = new ReplicatedSheetsResources(domainName, martian, serverURI, new MemoryStorage(),SyncPoint.getInstance());
-			config.register(rest);		
+			SyncPoint sync = SyncPoint.getInstance();
+			VersionFilter filter = new VersionFilter(sync);
+			RestSpreadsheetsReplication rest = new ReplicatedSheetsResources(domainName, martian, serverURI, new MemoryStorage(),sync);
+			config.register(rest);
+			config.register(filter);		
+
 			/*
 			 * This effectively starts the server (with
 				their own threads to handle client

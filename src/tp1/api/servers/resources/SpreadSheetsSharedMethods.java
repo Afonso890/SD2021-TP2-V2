@@ -25,6 +25,7 @@ public class SpreadSheetsSharedMethods {
 	private Client client;
 	private int ids;
 	private String uri;
+	private String users_domain;
 
 	public SpreadSheetsSharedMethods(String domainName, Discovery martian, String uri, StorageInterface spreadSheets) {
 		this.domainName=domainName;
@@ -32,7 +33,18 @@ public class SpreadSheetsSharedMethods {
 		this.spreadSheets=spreadSheets;
 		this.martian=martian;
 		this.uri=uri;
+		users_domain=domainName+":"+UsersServer.SERVICE;
 		ids=0;
+	}
+	/**
+	 * 
+	 * @return the domain name of the server of users for this spreadsheet domain
+	 */
+	public String getUsersDomain() {
+		return users_domain;
+	}
+	public Discovery getDiscovery() {
+		return martian;
 	}
 	/**
 	 * makes a request to the users server to verify the user

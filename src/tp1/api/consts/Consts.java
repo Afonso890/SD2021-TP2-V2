@@ -32,9 +32,9 @@ public class Consts {
 	public static final String apiSecret = "31kkgco1l2vfzdp";
 	public static final String accessTokenStr = "SsfyAnfENp4AAAAAAAAAAYEO8s8x8x4TM2QbVzeHAtJvxS4_1GzNcd8Y3En7Qr32";*/
 	
-	public static String apiKey;// = "9chdle2yya045j0";
-	public static String apiSecret;// = "xybv9724j3tgl6v";
-	public static String accessTokenStr;// = "-0qR1RteBDkAAAAAAAAAAQI7pokaWYO3Kubs97VGt7zHdbv4ST6kSbzSKL3ohQRK";
+	public static String apiKey;
+	public static String apiSecret;
+	public static String accessTokenStr;
 	
 	public static final String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 	
@@ -45,8 +45,8 @@ public class Consts {
 	public static final String OCTET_STREAM = "application/octet-stream";
 	
 	public static Gson json=new Gson();
-	public static OAuth20Service service;// = new ServiceBuilder(Consts.apiKey).apiSecret(Consts.apiSecret).build(DropboxApi20.INSTANCE);
-	public static OAuth2AccessToken accessToken;// =  new OAuth2AccessToken(Consts.accessTokenStr);
+	public static OAuth20Service service;
+	public static OAuth2AccessToken accessToken;
 	
 	
 	public Consts()

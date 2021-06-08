@@ -6,10 +6,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class SyncPoint
+import tp1.api.replication.ReplicationSyncReturn;
+import tp1.api.replication.VersionNumber;
+
+public class SyncPoint implements VersionNumber
 {
 	private static SyncPoint instance;
-
+	private static long CLEAN_PERIOD=8000;
 	public static synchronized SyncPoint getInstance() {
 		if( instance == null) {
 			instance = new SyncPoint();
@@ -18,13 +21,14 @@ public class SyncPoint
 		return instance;
 	}
 
-	private Map<Long,String> result;
+	private Map<Long,ReplicationSyncReturn> result;
 	private long version;
 	
 	
 	private SyncPoint() {
-		result = new HashMap<Long,String>();
+		result = new HashMap<Long,ReplicationSyncReturn>();
 		version=-1L;
+		removeDoCleabUp();
 	}
 	
 	
@@ -43,7 +47,7 @@ public class SyncPoint
 	/**
 	 * Assuming that results are added sequentially, returns null if the result is not available.
 	 */
-	public synchronized String waitForResult( long n) {
+	public synchronized ReplicationSyncReturn waitForResult( long n) {
 		while( version < n) {
 			try {
 				wait();
@@ -57,9 +61,9 @@ public class SyncPoint
 	/**
 	 * Updates the version and stores the associated result
 	 */
-	public synchronized void setResult( long n, String res) {
+	public synchronized void setResult( long n, ReplicationSyncReturn res) {
 		if( res != null)
-			result.put(n, res);
+			result.put(n,res);
 		version = n;
 		notifyAll();
 	}
@@ -68,14 +72,31 @@ public class SyncPoint
 		version=number;
 	}
 
+	public synchronized long getVersionNumber() {
+		return version;
+	}
 	/**
 	 * Cleans up results that will not be consumed
 	 */
 	public synchronized void cleanupUntil( long n) {
-		Iterator<Entry<Long,String>> it = result.entrySet().iterator();
+		Iterator<Entry<Long,ReplicationSyncReturn>> it = result.entrySet().iterator();
 		while( it.hasNext()) {
 			if( it.next().getKey() < n)
 				it.remove();
 		}
 	}
+
+	private void removeDoCleabUp() {
+		new Thread(()->{
+			while(true) {
+				try {
+					Thread.sleep(CLEAN_PERIOD);
+					cleanupUntil(version);
+				}catch(Exception e) {
+					
+				}
+			}
+		}).start();
+	}
 }
+

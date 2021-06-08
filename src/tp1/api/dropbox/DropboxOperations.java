@@ -29,9 +29,6 @@ public class DropboxOperations {
 	private static final String UPLOAD_FILE_URL = "https://content.dropboxapi.com/2/files/upload";
 	private static final String DOWNLOAD_FILE_URL = "https://content.dropboxapi.com/2/files/download";
 	private static final String DELETE_FILE_V2_URL = "https://api.dropboxapi.com/2/files/delete_v2";
-	//private static final String DELETE_BATCH_URL = "https://api.dropboxapi.com/2/files/delete_batch";
-	//private static final String LIST_FOLDER_URL = "https://api.dropboxapi.com/2/files/list_folder";
-	//private static final String LIST_FOLDER_CONTINUE_URL = "https://api.dropboxapi.com/2/files/list_folder/continue";
 	private String directoryName;
 
 	public DropboxOperations(String directoryName, boolean clean) {

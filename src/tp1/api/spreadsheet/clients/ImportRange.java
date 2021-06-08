@@ -35,7 +35,7 @@ public class ImportRange {
 
 	public final static String SHEETS_WSDL = "/spreadsheets/?wsdl";
 	private final static SheetsCache cache = new SheetsCache();
-	private static String apiKey = "";// ="AIzaSyBlavaHw1h9Th_RouiUa70iMWAhB18oizk";
+	private static String apiKey = "";
 	private static String GOOGLE_IMPORT_RANGE_TAG="google";
 		
 	public static String [][] importRange(String url, String range, String email,Client client) {
