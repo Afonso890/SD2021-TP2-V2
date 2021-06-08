@@ -1,4 +1,4 @@
-package tp1.api.replication;
+package tp1.api.servers.resources;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,6 +14,10 @@ import tp1.api.Spreadsheet;
 import tp1.api.SpreadsheetValuesWrapper;
 import tp1.api.consts.Consts;
 import tp1.api.discovery.Discovery;
+import tp1.api.replication.KafkaPublisher;
+import tp1.api.replication.KafkaSubscriber;
+import tp1.api.replication.ReceiveOperationArgs;
+import tp1.api.replication.RecordProcessor;
 import tp1.api.replication.args.CreateSpreadSheet;
 import tp1.api.replication.args.DeletSpreadsheet;
 import tp1.api.replication.args.DeleteUsersSheets;
@@ -21,7 +25,6 @@ import tp1.api.replication.args.Share;
 import tp1.api.replication.args.Unshare;
 import tp1.api.replication.args.Update;
 import tp1.api.replication.sync.SyncPoint;
-import tp1.api.servers.resources.SpreadSheetsSharedMethods;
 import tp1.api.service.rest.RestSpreadsheetsReplication;
 import tp1.api.storage.StorageInterface;
 
@@ -145,8 +148,6 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 			version=sync.getVersionNumber();
 		}
 		sync.waitForVersion(version);
-		System.out.println("PPPPPPPPPPPPPPPPPPPPPP "+version);
-		System.out.println("VERSION -------> "+sync.getVersionNumber());
 		return super.getSpreadsheet(sheetId,userId, password);
 	}
 		
@@ -187,7 +188,8 @@ public class ReplicatedSheetsResources extends SpreadSheetsSharedMethods impleme
 		}
 		List<String> topicLst = new LinkedList<String>();
 		topicLst.add(getDomain());
-		KafkaSubscriber subscriber = KafkaSubscriber.createSubscriber("localhost:9092, kafka:9092", topicLst);
+		//"localhost:9092, kafka:9092"
+		KafkaSubscriber subscriber = KafkaSubscriber.createSubscriber(KAFKA_HOSTS,topicLst);
 		
 		subscriber.start( new RecordProcessor() {
 			@Override
